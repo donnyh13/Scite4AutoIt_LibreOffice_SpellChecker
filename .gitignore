@@ -1,0 +1,4 @@
+*.au3.bak
+*kopia.au3
+BackUp/*
+Scite4AutoIt_LO_SpellChecker/Backup/*

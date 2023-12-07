@@ -48,6 +48,5 @@ Please complete the following information.
 
 - OS: [e.g. Windows 10]
 - OS Arch.: [e.g. X64]
-- LibreOffice Component: [e.g. Writer, Calc]
 - LibreOffice version: [e.g. 7.3.4.2]
-- Au3LibreOffice Version: [e.g. 0.0.0.3]
+- Scite4AutoIt_LO_SpellChecker: [e.g. 0.0.0.1]

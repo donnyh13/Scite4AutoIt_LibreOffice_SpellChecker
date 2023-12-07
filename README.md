@@ -1,12 +1,13 @@
 # Scite4AutoIt_LibreOffice_SpellChecker
 
 ## Description
- Integrates LibreOffice's Spell Checker ability into Scite4AutoIt.
+ Integrates LibreOffice's Spell Checker ability into Scite4AutoIt. Allowing for single word Spell Checking, or whole script misspell marking.
 
 ## Requirements
 This SpellChecker requires the following to function:
 - Full installation of Scite4AutoIt
 - LibreOffice (**Installed** version only, portable **WILL NOT** work.)
+- Desired Spell Checking language installed in Libre Office.
 
 ## Installation
 
@@ -47,14 +48,17 @@ command.mode.47.$(au3)=subsystem:lua,savebefore:no
 command.shortcut.47.$(au3)=Ctrl+Shift+H
 command.47.$(au3)=InvokeTool PersonalTools.ClearSpChk
 
-  - You may modify any Shortcut key combinations as necessary.
+  *You may modify any Shortcut key combinations as necessary.*
 - Restart Scite
 
 - You may set the following settings by pasting the below properties in your "User Options" File, and modifying the value after "="
+
 personal.tools.Language=en
 personal.tools.Country=US
+
   - Language must be a LOWER CASE two or three character ISO 639 Language Code. You can find a list of these codes online, such as https://iso639-3.sil.org/code_tables/639/data. 
   - Country must be a UPPER CASE two character ISO 3166 Country Code. You can find a list of these codes online, such as https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2
+  - **YOU MUST HAVE THE desired Language installed in Libre Office already for this to work**.
 
 ## Release
 
