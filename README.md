@@ -60,6 +60,10 @@ personal.tools.Country=US
   - Country must be a UPPER CASE two character ISO 3166 Country Code. You can find a list of these codes online, such as https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2
   - **YOU MUST HAVE THE desired Language installed in Libre Office already for this to work**.
 
+- You can add words to ignore in the file "Scite4AutoIt_LO_IgnoredWords.ini" that you placed in "%LocalAppData%\Local\AutoIt v3\SciTE\Scite4AutoIt_LO_SpellChecker".
+  - ONLY one word per line.
+  - No puctuation characters please.
+  
 ## Release
 
 ## Changes
