@@ -21,10 +21,8 @@ To "Install" this AddOn for Scite4AutoIt, do the following.
     - Copy the PersonalTools.lua file from the Add-On folder to the %LocalAppData%\Local\AutoIt v3\SciTE directory.
   - If you do have custom scripts present in PersonalTools.lua,
     - Open the PersonalTools.lua file in the Add-On folder and copy everything in the file below the following entry,
-      > -------------------------------------------------------------------------------
-      > -- required line ... do not remove
+      > -- required line ... do not remove  
       > PersonalTools = EventClass:new(Common)
-      > -------------------------------------------------------------------------------
     - Paste the contents into the end of the PersonalTools.lua file found in the %LocalAppData%\Local\AutoIt v3\SciTE directory.
 - Open Scite editor, Select "Options" in the toolbar, Select "Open User Options File".
 - Copy and paste the following into the "User Options" File. (If you have previous custom Lua Scripts, you may need to modify the command numbering.)
