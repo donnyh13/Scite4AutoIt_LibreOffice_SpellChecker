@@ -21,7 +21,7 @@ function PersonalTools:SingleWordCheck()
     local sSpChkErrorFile = sSciteUserHome ..  "\\Scite4AutoIt_LO_SpellChecker\\Scite4AutoIt_LO_SpellChecker_ERROR.ini"
     local sCurWord, sText, sLang, sCountry = "", "", "en", "US"
     local bReturn
-    local iExit, iSignal, iCount, iSpChkIndicator, iOldIndic = nil, nil, 0, 10, nil
+    local iExit, iSignal, iCount, iSpChkIndicator, iOldIndic, iCurWordStart, iCurWordEnd = nil, nil, 0, 10, nil, nil, nil
     local aWords = {}
     local hFile
     local old_seperator
@@ -47,14 +47,40 @@ function PersonalTools:SingleWordCheck()
     if (props["personal.tools.Language"] == "") then sLang = "en" else sLang = props["personal.tools.Language"] end
     if (props["personal.tools.Country"] == "") then sCountry = "US" else sCountry = props["personal.tools.Country"] end
 
-    sCurWord = editor:textrange(editor:WordStartPosition(editor.CurrentPos, true), editor:WordEndPosition(editor.CurrentPos, true))
+    iCurWordStart = editor:WordStartPosition(editor.CurrentPos, true)
+    iCurWordEnd = editor:WordEndPosition(editor.CurrentPos, true)
+
+    editor:SetTargetRange(iCurWordStart, iCurWordEnd)
+    if (string.find(editor.TargetText,"[; %(%)%[\\//," .. '"' .. "]") == 1) and
+        (string.find(editor.TargetText,"[%a]") ~= nil) then -- If there is a semicolon, space or beginning round bracket at the beginning of the word, adjust the selection to skip it.
+        iCurWordStart = iCurWordStart + 1
+        editor:SetTargetRange(iCurWordStart, iCurWordEnd)
+    end
+
+    if (string.find(editor.TargetText,"[ %.\\//]",string.len(editor.TargetText) - 1) ~= nil) and
+        (string.find(editor.TargetText,"[%a]") ~= nil) then -- If there is a space or period at the end of the word, adjust the selection to skip it.
+        iCurWordEnd = iCurWordEnd - 1
+        editor:SetTargetRange(iCurWordStart, iCurWordEnd)
+    end
+
+    sText = editor.TargetText
+
+    editor:SetTargetRange(iCurWordEnd, iCurWordEnd + 1)
+
+    if (string.find(editor.TargetText, "'")) and editor:IsRangeWord(iCurWordStart, iCurWordEnd + 2) then
+        iCurWordEnd = iCurWordEnd + 2
+    end
+
+    editor:SetTargetRange(iCurWordStart, iCurWordEnd)
+
+    sCurWord = editor.TargetText
 
     if (sCurWord == '') then return output:AppendText("! Cursor is NOT located in a word.\n") end
 
     -- Clear any SpellChecking markings for the current word.
     iOldIndic = editor.IndicatorCurrent
     editor.IndicatorCurrent = iSpChkIndicator
-    editor:IndicatorClearRange(editor:WordStartPosition(editor.CurrentPos, true), editor:WordEndPosition(editor.CurrentPos, true))
+    editor:IndicatorClearRange(iCurWordStart, iCurWordEnd - iCurWordStart)
     editor.IndicatorCurrent = iOldIndic
 
     bReturn, iExit, iSignal = os.execute('"' .. sSpChkScript .. '"' .. " " .. sCurWord .. " " .. sLang .. " " .. sCountry .. " " .. "true")
@@ -76,7 +102,7 @@ function PersonalTools:SingleWordCheck()
         io.close(hFile)
 
         if (iCount > 0) then
-            editor:GotoPos(editor:WordEndPosition(editor.CurrentPos,true))
+            editor:GotoPos(iCurWordEnd)
 
             old_seperator = editor.AutoCSeparator
             editor.AutoCSeparator = string.byte(';')
@@ -166,7 +192,7 @@ function PersonalTools:CheckScript()
     if (props["personal.tools.Language"] ~= "") then sLang = props["personal.tools.Language"] end
     if (props["personal.tools.Country"] ~= "") then sCountry = props["personal.tools.Country"] end
 
-    PersonalTools:ClearSpChk() -- Clear any previous spell checking marks.
+    PersonalTools:ClearSpChk(true) -- Clear any previous spell checking marks.
 
     hFile = io.open(sSpChkIgnoredWords, "r")
 
@@ -193,6 +219,8 @@ function PersonalTools:CheckScript()
     end
     -- ## WordIsIgnored Func ##
 
+    editor:Colourise(0, -1)
+
     for iLine = 0, editor.LineCount do
 
         iLineStart = editor:PositionFromLine(iLine)
@@ -204,12 +232,13 @@ function PersonalTools:CheckScript()
             iWordStart = editor:WordStartPosition(iPos)
             iWordEnd = editor:WordEndPosition(iPos)
 
-            if (iWordEnd ~= iWordStart) then
+            if (iWordStart ~= iWordEnd) and (editor:LineFromPosition(iWordEnd) == iLine) then
+
                 iCStyle = editor.StyleAt[iWordStart + 1]
                 if (iCStyle == SCE_AU3_COMMENT) or (iCStyle == SCE_AU3_COMMENTBLOCK) or (iCStyle == SCE_AU3_STRING) then
 
                     editor:SetTargetRange(iWordStart, iWordEnd)
-                    if (string.find(editor.TargetText,"[; %(%)\\//]") == 1) and
+                    if (string.find(editor.TargetText,"[; %(%)%[\\//," .. '"' .. "]") == 1) and
                         (string.find(editor.TargetText,"[%a]") ~= nil) then -- If there is a semicolon, space or beginning round bracket at the beginning of the word, adjust the selection to skip it.
                         iWordStart = iWordStart + 1
                         editor:SetTargetRange(iWordStart, iWordEnd)
@@ -323,14 +352,14 @@ end
 --command.47.$(au3)=InvokeTool PersonalTools.ClearSpChk
 --
 --------------------------------------------------------------------------------
-function PersonalTools:ClearSpChk()
+function PersonalTools:ClearSpChk(bInternalCall)
     local  iOldIndic, iSpChkIndicator = nil, 10
-    output:AppendText("- Scite4AutoIt_LibreOffice_SpellChecker -\n")
+    if (bInternalCall ~= true) then output:AppendText("- Scite4AutoIt_LibreOffice_SpellChecker -\n") end
     iOldIndic = editor.IndicatorCurrent
     editor.IndicatorCurrent = iSpChkIndicator
     editor:IndicatorClearRange(0, editor.LineEndPosition[editor.LineCount]) -- Clear any previous spell checking marks.
     output:AppendText("> Spell Check markings successfully cleared.\n")
     editor.IndicatorCurrent = iOldIndic
-    output:AppendText("++ Scite4AutoIt_LibreOffice_SpellChecker completed. ++\n")
+    if (bInternalCall ~= true) then output:AppendText("++ Scite4AutoIt_LibreOffice_SpellChecker completed. ++\n") end
 
 end
