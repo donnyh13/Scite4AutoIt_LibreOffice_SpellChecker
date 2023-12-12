@@ -11,6 +11,16 @@ Go to [legend](#legend---types-of-changes) for further information about the typ
 
 ## [0.0.1-alpha] - 2023-??-??
 
+### Fixed
+
+- Spell Checking sometimes not scanning whole document.
+
+### Changed
+
+- Single Word Check to eliminate periods at the end of the word if present. 
+- Various puctuation characters are skipped at the beginning of words.
+- Includes apostrophied words.
+
 ### Added
 
 - Initial Release.
