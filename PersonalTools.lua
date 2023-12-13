@@ -51,13 +51,22 @@ function PersonalTools:SingleWordCheck()
     iCurWordEnd = editor:WordEndPosition(editor.CurrentPos, true)
 
     editor:SetTargetRange(iCurWordStart, iCurWordEnd)
-    if (string.find(editor.TargetText,"[; %(%)%[\\//," .. '"' .. "]") == 1) and
+    if (string.find(editor.TargetText,"[; %(%)%[\\//" .. '"' .. "]") == 1) and
         (string.find(editor.TargetText,"[%a]") ~= nil) then -- If there is a semicolon, space or beginning round bracket at the beginning of the word, adjust the selection to skip it.
         iCurWordStart = iCurWordStart + 1
         editor:SetTargetRange(iCurWordStart, iCurWordEnd)
     end
 
-    if (string.find(editor.TargetText,"[ %.\\//]",string.len(editor.TargetText) - 1) ~= nil) and
+       -- Check for a dashed word
+       editor:SetTargetRange(iCurWordStart, iCurWordEnd + 1)
+       if (string.find(editor.TargetText,"[-]",string.len(editor.TargetText) - 1) ~= nil) and
+       (string.find(editor.TargetText,"[%a]") ~= nil) then -- If there is a dash at the end of the word, adjust the selection to include the rest of the word.
+       iCurWordEnd = editor:WordEndPosition(iCurWordEnd + 1)
+       end
+
+       editor:SetTargetRange(iCurWordStart, iCurWordEnd)
+
+    if (string.find(editor.TargetText,"[ %.,\\//]",string.len(editor.TargetText) - 1) ~= nil) and
         (string.find(editor.TargetText,"[%a]") ~= nil) then -- If there is a space or period at the end of the word, adjust the selection to skip it.
         iCurWordEnd = iCurWordEnd - 1
         editor:SetTargetRange(iCurWordStart, iCurWordEnd)
@@ -238,13 +247,22 @@ function PersonalTools:CheckScript()
                 if (iCStyle == SCE_AU3_COMMENT) or (iCStyle == SCE_AU3_COMMENTBLOCK) or (iCStyle == SCE_AU3_STRING) then
 
                     editor:SetTargetRange(iWordStart, iWordEnd)
-                    if (string.find(editor.TargetText,"[; %(%)%[\\//," .. '"' .. "]") == 1) and
+                    if (string.find(editor.TargetText,"[; %(%)%[\\//" .. '"' .. "]") == 1) and
                         (string.find(editor.TargetText,"[%a]") ~= nil) then -- If there is a semicolon, space or beginning round bracket at the beginning of the word, adjust the selection to skip it.
                         iWordStart = iWordStart + 1
                         editor:SetTargetRange(iWordStart, iWordEnd)
                     end
 
-                    if (string.find(editor.TargetText,"[ %.\\//]",string.len(editor.TargetText) - 1) ~= nil) and
+                    -- Check for a dashed word
+                    editor:SetTargetRange(iWordStart, iWordEnd + 1)
+                    if (string.find(editor.TargetText,"[-]",string.len(editor.TargetText) - 1) ~= nil) and
+                    (string.find(editor.TargetText,"[%a]") ~= nil) then -- If there is a dash at the end of the word, adjust the selection to include the full word.
+                    iWordEnd = editor:WordEndPosition(iWordEnd + 1)
+                    end
+
+                    editor:SetTargetRange(iWordStart, iWordEnd)
+
+                    if (string.find(editor.TargetText,"[ %.,\\//" .. '"' .. "]",string.len(editor.TargetText) - 1) ~= nil) and
                         (string.find(editor.TargetText,"[%a]") ~= nil) then -- If there is a space or period at the end of the word, adjust the selection to skip it.
                         iWordEnd = iWordEnd - 1
                         editor:SetTargetRange(iWordStart, iWordEnd)
