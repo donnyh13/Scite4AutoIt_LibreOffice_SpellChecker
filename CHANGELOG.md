@@ -1,6 +1,4 @@
-#####
-
-# Changelog
+# Scite4AutoIt_LibreOffice_SpellChecker Changelog
 
 All notable changes to "Scite4AutoIt_LO_SpellChecker" will be documented in this file.
 
@@ -20,10 +18,16 @@ Go to [legend](#legend---types-of-changes) for further information about the typ
 - Single Word Check to eliminate periods at the end of the word if present. 
 - Various puctuation characters are skipped at the beginning of words.
 - Includes apostrophied words.
+- Changed "personal.tools.Language" to "S4A.SpellCheck.Language"
+- Changed "personal.tools.Country" to  "S4A.SpellCheck.Country"
 
 ### Added
 
 - Initial Release.
+- S4A.SpellCheck.Highlight property.
+- S4A.SpellCheck.MaxSuggestions property.
+- Multi-Language spell checking support.
+- Details to ReadMe
 
 ---
 
