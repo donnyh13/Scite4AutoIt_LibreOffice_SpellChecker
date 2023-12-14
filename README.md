@@ -54,7 +54,7 @@ To "Install" this AddOn for Scite4AutoIt, do the following.
 ## Ignored Words
 - You can add words to **ignore** in the file "Scite4AutoIt_LO_IgnoredWords.ini" that you placed in "%LocalAppData%\Local\AutoIt v3\SciTE\Scite4AutoIt_LO_SpellChecker".
   - ONLY one word per line.
-  - No lone puctuation characters.
+  - No lone punctuation characters.
   - Words are Case Sensitive.
 
 ## Properties
