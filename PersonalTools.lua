@@ -397,7 +397,7 @@ end
 function PersonalTools:ClearSpChk(bInternalCall)
     local iOldIndic, iSpChkIndicator = nil, 10
     local iTimer = os.clock()
-
+    if output.LinesOnScreen == 0 then scite.MenuCommand(IDM_TOGGLEOUTPUT) end
     if (bInternalCall ~= true) then output:AppendText("- Scite4AutoIt_LibreOffice_SpellChecker -\n") end
 
     iOldIndic = editor.IndicatorCurrent
