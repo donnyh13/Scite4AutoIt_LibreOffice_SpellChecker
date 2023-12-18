@@ -15,11 +15,12 @@ Go to [legend](#legend---types-of-changes) for further information about the typ
 
 ### Changed
 
-- Single Word Check to eliminate periods at the end of the word if present. 
+- Single Word Check to eliminate periods at the end of the word if present.
 - Various puctuation characters are skipped at the beginning of words.
 - Includes apostrophied words.
 - Changed "personal.tools.Language" to "S4A.SpellCheck.Language"
 - Changed "personal.tools.Country" to  "S4A.SpellCheck.Country"
+- Scite4AutoIt_LO_SpellChecker.au3 to use all functions without using global variables.
 
 ### Added
 
