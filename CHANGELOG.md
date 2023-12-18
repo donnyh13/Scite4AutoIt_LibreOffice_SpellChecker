@@ -27,7 +27,9 @@ Go to [legend](#legend---types-of-changes) for further information about the typ
 - S4A.SpellCheck.Highlight property.
 - S4A.SpellCheck.MaxSuggestions property.
 - Multi-Language spell checking support.
-- Details to ReadMe
+- Details to ReadMe.
+- Comments in Script.
+- Misspelled words found in folds are now unfolded.
 
 ---
 
