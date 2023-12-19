@@ -1,6 +1,6 @@
 #AutoIt3Wrapper_Au3Check_Parameters=-d -w 1 -w 2 -w 3 -w 4 -w 5 -w 6 -w 7
 
-_Scite4AutoIt_SpellChecking
+_Scite4AutoIt_SpellChecking()
 
 ; #FUNCTION# ====================================================================================================================
 ; Name ..........: _Scite4AutoIt_SpellChecking
@@ -37,7 +37,7 @@ Func _Scite4AutoIt_SpellChecking()
 
 		EndIf
 
-	Else ; If not params passed, exit.
+	Else ; If no parameters passed, exit.
 		__S4A_SpChk_Print_To_Error("No Parameters passed")
 		Exit 2
 
@@ -91,7 +91,7 @@ Func _S4A_SpChk_SpellCheck($sWordToCheck, $sLanguage, $sCountry, $bReturnWords, 
 
 	EndIf
 
-	If Not IsBool($bReturnWords) Then Return SetError($__S4A_LO_SC_INPUT_ERROR, 4, __S4A_SpChk_Print_To_Error("ReturnWords parameter called is is not a Boolean."))
+	If Not IsBool($bReturnWords) Then Return SetError($__S4A_LO_SC_INPUT_ERROR, 4, __S4A_SpChk_Print_To_Error("Return Words parameter called is is not a Boolean."))
 	If StringRegExp($iMaxSuggestions, "[^0-9]") Then Return SetError($__S4A_LO_SC_INPUT_ERROR, 5, __S4A_SpChk_Print_To_Error("Maximum Suggestion per Language parameter called is is not a number."))
 
 	$sCountry = StringUpper($sCountry)
@@ -498,7 +498,7 @@ EndFunc   ;==>__S4A_SpChk_Print_To_Error
 ; #INTERNAL_USE_ONLY# ===========================================================================================================
 ; Name ..........: __S4A_SpChk_ComErrorHandler
 ; Description ...: ComError Handler
-; Syntax ........: __S4A_SpChk_ComErrorHandler(Byref $oComError)
+; Syntax ........: __S4A_SpChk_ComErrorHandler(ByRef $oComError)
 ; Parameters ....: $oComError           - [in/out] an object. The Com Error Object passed by Autoit.Error.
 ; Return values .: None
 ; Author ........: mLipok
