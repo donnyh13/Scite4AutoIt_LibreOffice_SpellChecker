@@ -78,7 +78,7 @@ S4A.SpellCheck.Country=US
 - **YOU MUST HAVE THE desired Language installed in Libre Office already for this to work**.
 - **Default** is Language: en, Country: US
 
-- Also accepts multiple value pairs seperated by a semicolon, such as:  
+- Also accepts multiple value pairs separated by a semicolon, such as:  
 S4A.SpellCheck.Language=en;pl  
 S4A.SpellCheck.Country=US;PL
 - Pairs must be equal between Language and Country. And each column must be a valid Language and Country pair. i.e. en US, pl PL.
