@@ -60,9 +60,10 @@ To "Install" this AddOn for Scite4AutoIt, do the following.
 ## Ignored Words
 
 - You can add words to **ignore** in the file "Scite4AutoIt_LO_IgnoredWords.ini" that you placed in "%LocalAppData%\Local\AutoIt v3\SciTE\Scite4AutoIt_LO_SpellChecker".
-  - ONLY one word per line.
-  - No lone punctuation characters.
-  - Words are Case Sensitive.
+
+ - ONLY one word per line.
+ - No lone punctuation characters.
+ - Words are Case Sensitive.
 
 ## Properties
 
@@ -100,12 +101,19 @@ S4A.SpellCheck.MaxSuggestions=10
 - Must contain only digits, and be greater than 0.
 - **Default** is 10.
 
+### Markers Off
+
+S4A.SpellCheck.UseMarkers=y
+
+- Set to "n" (no quotes) to skip adding a marker in the left hand margin of Scite on each line containing a spelling error.
+
 ## Notes
 
 This function uses the following Styles for Scite functions.
 
 - UserList Type: **18**
 - Indicator Style: **10**
+- Marker Number: **18**
 
 ## Release
 
