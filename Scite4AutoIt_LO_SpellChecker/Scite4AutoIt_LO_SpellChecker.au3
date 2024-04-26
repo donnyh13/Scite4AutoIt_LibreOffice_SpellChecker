@@ -70,7 +70,7 @@ Func _S4A_SpChk_SpellCheck($sWordToCheck, $sLanguage, $sCountry, $bReturnWords, 
 	#forceref $oCOM_ErrorHandler
 
 	Local Const $__S4A_LO_SC_INPUT_ERROR = 1, $__S4A_LO_SC_INIT_ERROR = 2, $__S4A_LO_SC_PROCESS_ERROR = 3
-	Local Const $FO_READ = 0, $FO_OVERWRITE = 2, $FO_CREATEPATH = 8
+	Local Const $__FO_READ = 0, $__FO_OVERWRITE = 2, $FO_CREATEPATH = 8
 	Local $sSpCheckFile = @ScriptDir & "\Scite4AutoIt_LO_SpellChecker.ini"
 	Local $oServiceManager, $oSpellChecker
 	Local $aEmptyArgs[1]
@@ -91,8 +91,8 @@ Func _S4A_SpChk_SpellCheck($sWordToCheck, $sLanguage, $sCountry, $bReturnWords, 
 
 	EndIf
 
-	If Not IsBool($bReturnWords) Then Return SetError($__S4A_LO_SC_INPUT_ERROR, 4, __S4A_SpChk_Print_To_Error("Return Words parameter called is is not a Boolean."))
-	If StringRegExp($iMaxSuggestions, "[^0-9]") Then Return SetError($__S4A_LO_SC_INPUT_ERROR, 5, __S4A_SpChk_Print_To_Error("Maximum Suggestion per Language parameter called is is not a number."))
+	If Not IsBool($bReturnWords) Then Return SetError($__S4A_LO_SC_INPUT_ERROR, 4, __S4A_SpChk_Print_To_Error("Return Words parameter called is not a Boolean."))
+	If StringRegExp($iMaxSuggestions, "[^0-9]") Then Return SetError($__S4A_LO_SC_INPUT_ERROR, 5, __S4A_SpChk_Print_To_Error("Maximum Suggestion per Language parameter called is not a number."))
 
 	$sCountry = StringUpper($sCountry)
 	$sLanguage = StringLower($sLanguage)
@@ -170,7 +170,7 @@ Func _S4A_SpChk_SpellCheck($sWordToCheck, $sLanguage, $sCountry, $bReturnWords, 
 	Next
 
 	If ($bReturnWords = True) Then ; If Return Words = True, then I am checking a single word.
-		$hFile = FileOpen($sSpCheckFile, $FO_OVERWRITE)
+		$hFile = FileOpen($sSpCheckFile, $__FO_OVERWRITE)
 		If ($hFile = -1) Then Return SetError($__S4A_LO_SC_INIT_ERROR, 1, __S4A_SpChk_Print_To_Error("Failed to open Scite4AutoIt_LO_SpellChecker.ini. #2"))
 		FileFlush($hFile)
 
@@ -178,7 +178,7 @@ Func _S4A_SpChk_SpellCheck($sWordToCheck, $sLanguage, $sCountry, $bReturnWords, 
 		Return SetError(@error, FileClose($hFile), $vReturn)
 
 	Else ; Entire Script check.
-		$hFile = FileOpen($sSpCheckFile, $FO_READ)
+		$hFile = FileOpen($sSpCheckFile, $__FO_READ)
 		If ($hFile = -1) Then Return SetError($__S4A_LO_SC_INIT_ERROR, 1, __S4A_SpChk_Print_To_Error("Failed to open Scite4AutoIt_LO_SpellChecker.ini. #3"))
 
 		$vReturn = __S4A_SpChk_ScriptWordCheck($hFile, $oSpellChecker, $atLocale, $aEmptyArgs)
@@ -279,7 +279,7 @@ EndFunc   ;==>__S4A_SpChk_SingleWordCheck
 ; ===============================================================================================================================
 Func __S4A_SpChk_ScriptWordCheck(ByRef $hFile, ByRef $oSpellChecker, ByRef $atLocale, ByRef $aEmptyArgs)
 	Local Const $__S4A_LO_SC_SUCCESS = 0, $__S4A_LO_SC_INIT_ERROR = 2, $__S4A_LO_SC_PROCESS_ERROR = 3
-	Local Const $FO_OVERWRITE = 2
+	Local Const $__FO_OVERWRITE = 2
 	Local $asWords[0]
 	Local $iLines = 0, $iCount = 0
 	Local $sWordToCheck = "", $sSpCheckFile = @ScriptDir & "\Scite4AutoIt_LO_SpellChecker.ini"
@@ -292,7 +292,7 @@ Func __S4A_SpChk_ScriptWordCheck(ByRef $hFile, ByRef $oSpellChecker, ByRef $atLo
 	FileClose($hFile)
 
 	; Open and clear the file.
-	$hFile = FileOpen($sSpCheckFile, $FO_OVERWRITE)
+	$hFile = FileOpen($sSpCheckFile, $__FO_OVERWRITE)
 	If ($hFile = -1) Then Return SetError($__S4A_LO_SC_INIT_ERROR, 1, __S4A_SpChk_Print_To_Error("Failed to open Scite4AutoIt_LO_SpellChecker.ini. #4"))
 	FileFlush($hFile)
 
@@ -463,26 +463,26 @@ Func __S4A_SpChk_Print_To_Error($sError = "")
 	Local Const $__sError_File = @ScriptDir & "\Scite4AutoIt_LO_SpellChecker_ERROR.ini"
 	Local Const $__S4A_LO_SC_SUCCESS = 0, $__S4A_LO_SC_INIT_ERROR = 2
 	Local $hFile
-	Local Const $FO_READ = 0, $FO_APPEND = 1, $FO_OVERWRITE = 2
+	Local Const $__FO_READ = 0, $__FO_APPEND = 1, $__FO_OVERWRITE = 2
 
-	$hFile = FileOpen($__sError_File, $FO_READ)
+	$hFile = FileOpen($__sError_File, $__FO_READ)
 
 	If ($hFile = -1) Then ; Create File
-		$hFile = FileOpen($__sError_File, $FO_OVERWRITE)
+		$hFile = FileOpen($__sError_File, $__FO_OVERWRITE)
 		If ($hFile = -1) Then Return SetError($__S4A_LO_SC_INIT_ERROR, 1, 0)
 	EndIf
 
 	FileClose($hFile)
 
 	If ($sError = "") Then ; Clear the error file.
-		$hFile = FileOpen($__sError_File, $FO_OVERWRITE)
+		$hFile = FileOpen($__sError_File, $__FO_OVERWRITE)
 		If ($hFile = -1) Then Return SetError($__S4A_LO_SC_INIT_ERROR, 1, 0)
 
 	ElseIf ($sError = Null) Then
 		FileDelete($__sError_File)
 
 	Else ; Write the error.
-		$hFile = FileOpen($__sError_File, $FO_APPEND)
+		$hFile = FileOpen($__sError_File, $__FO_APPEND)
 		If ($hFile = -1) Then Return SetError($__S4A_LO_SC_INIT_ERROR, 1, 0)
 	EndIf
 

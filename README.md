@@ -60,9 +60,10 @@ To "Install" this AddOn for Scite4AutoIt, do the following.
 ## Ignored Words
 
 - You can add words to **ignore** in the file "Scite4AutoIt_LO_IgnoredWords.ini" that you placed in "%LocalAppData%\Local\AutoIt v3\SciTE\Scite4AutoIt_LO_SpellChecker".
-  - ONLY one word per line.
-  - No lone punctuation characters.
-  - Words are Case Sensitive.
+
+ - ONLY one word per line.
+ - No lone punctuation characters.
+ - Words are Case Sensitive.
 
 ## Properties
 
@@ -78,7 +79,7 @@ S4A.SpellCheck.Country=US
 - **YOU MUST HAVE THE desired Language installed in Libre Office already for this to work**.
 - **Default** is Language: en, Country: US
 
-- Also accepts multiple value pairs seperated by a semicolon, such as:  
+- Also accepts multiple value pairs separated by a semicolon, such as:  
 S4A.SpellCheck.Language=en;pl  
 S4A.SpellCheck.Country=US;PL
 - Pairs must be equal between Language and Country. And each column must be a valid Language and Country pair. i.e. en US, pl PL.
@@ -100,12 +101,19 @@ S4A.SpellCheck.MaxSuggestions=10
 - Must contain only digits, and be greater than 0.
 - **Default** is 10.
 
+### Markers Off
+
+S4A.SpellCheck.UseMarkers=y
+
+- Set to "n" (no quotes) to skip adding a marker in the left hand margin of Scite on each line containing a spelling error.
+
 ## Notes
 
 This function uses the following Styles for Scite functions.
 
 - UserList Type: **18**
 - Indicator Style: **10**
+- Marker Number: **18**
 
 ## Release
 
