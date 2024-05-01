@@ -484,7 +484,7 @@ end
 --	iListType - The User List Type.
 --	sSel - The word selected by the user from the User List.
 --------------------------------------------------------------------------------
-function PersonalTools.OnUserListSelection(iListType, sSel)
+function PersonalTools:OnUserListSelection(iListType, sSel)
     -- Settings that can be modified for compatibility with other LUA Scripts.
     local iMyListType = 18
     --##########################
@@ -528,5 +528,6 @@ function PersonalTools.OnUserListSelection(iListType, sSel)
 
         -- Lexer the new word.
         editor:Colourise(editor.CurrentPos - string.len(sSel), editor.CurrentPos)
+
     end
 end

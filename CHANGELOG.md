@@ -11,10 +11,17 @@ Go to [legend](#legend---types-of-changes) for further information about the typ
 
 |    Version           |    Changes                              |    Download                    |     Released   |    Compare on GitHub       |
 |:---------------------|:---------------------------------------:|:------------------------------:|:--------------:|:---------------------------|
-|    **v0.1.0**        | [Change Log](#010---2024-04-)            | [v0.1.0][v0.1.0]               | 2024-04-??     | [Compare][v0.1.0-Compare]  |
+|    **v0.1.1**        | [Change Log](#011---2024-05-01)         | [v0.1.0][v0.1.1]               | 2024-04-26     | [Compare][v0.1.1-Compare]  |
+|    **v0.1.0**        | [Change Log](#010---2024-04-26)         | [v0.1.0][v0.1.0]               | 2024-04-26     | [Compare][v0.1.0-Compare]  |
 |    **v0.0.1-alpha**  | [Change Log](#001-alpha---2023-12-20)   | [v0.0.1-alpha][v0.0.1-alpha]   | 2023-12-20     |                            |
 
-## [0.1.0] - 2024-04-??
+## [0.1.1] - 2024-05-01
+
+### Fixed
+
+- Accidentally broke word replacer on user selection.
+
+## [0.1.0] - 2024-04-26
 
 ### Added
 
@@ -76,11 +83,13 @@ Go to [legend](#legend---types-of-changes) for further information about the typ
 
 ##
 
-[To the top](#scite4autoitlibreofficespellchecker-changelog)
+[To the top](#releases)
 
 ---
 
 [v0.1.0-Compare]:	https://github.com/donnyh13/Au3LibreOffice/compare/v0.0.1-alpha...v0.1.0
+[v0.1.1-Compare]:	https://github.com/donnyh13/Au3LibreOffice/compare/v0.1.0...v0.1.1
 
+[v0.1.1]:	https://github.com/donnyh13/Au3LibreOffice/releases/tag/v0.1.1
 [v0.1.0]:	https://github.com/donnyh13/Au3LibreOffice/releases/tag/v0.1.0
 [v0.0.1-alpha]:	https://github.com/donnyh13/Scite4AutoIt_LibreOffice_SpellChecker/releases/tag/0.0.1-alpha
