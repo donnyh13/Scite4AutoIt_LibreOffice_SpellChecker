@@ -99,7 +99,7 @@ function PersonalTools.SingleWordCheck()
     editor.IndicatorCurrent = iOldIndic
 
     -- Delete the marker if there are no spelling errors remaining on the line.
-    if (editor:MarkerGet(iLine) & iMarkerMask ~= iMarkerMask) and
+    if (editor:MarkerGet(iLine) & iMarkerMask == iMarkerMask) and
         (editor:LineFromPosition(editor:IndicatorEnd(iSpChkIndicator, iLineStart)) ~= iLine) then editor:MarkerDelete(iLine, iMarker) end
     -- if (editor:LineFromPosition(editor:IndicatorEnd(iSpChkIndicator, iLineStart)) ~= iLine) then editor:MarkerDelete(iLine, iMarker) end
 
