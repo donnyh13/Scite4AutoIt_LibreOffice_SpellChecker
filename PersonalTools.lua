@@ -34,8 +34,21 @@ function PersonalTools.SingleWordCheck()
     local aWords = {}
     local hFile
     local old_separator
-    local sSearchPattern = "[%s%p]?([$@]-[%w_]+['%.,-]?[%w_]+)[%s%p]?"
+
+    local accents = "àèìòùÀÈÌÒÙáéíóúýÁÉÍÓÚÝâêîôûÂÊÎÔÛãñõÃÑÕäëïöüÿÄËÏÖÜçÇßøØ"
+    local AlphaNumeric = "%w" .. accents
+    local Alpha = "%a" .. accents
+    -- Include periods, commas, and back/forward slashes to be able to skip URLs/paths.
+    -- In initial frontier and the first optional match, include @ and $ to catch and then filter out variables and macros.
+    -- Make the last capture group mandatory to optionally get hyphenated and apostrophied words without catching commas, periods etc after a word.
+    local pattern = "%f[%._%$@:#"..Alpha.."]([%._%$@:#"..Alpha.."]*[%.,'\\//_%-:]*["..AlphaNumeric.."]+)[^"..AlphaNumeric.."]"
+    local sSearchPattern = pattern
     local iMarkerMask = (1 << iMarker)
+
+    if (editor.Focus ~= true) then
+        output:AppendText("! Scite4AutoIt_LO_SpellChecker.au3 caret not in editor. -- Aborting\n")
+        return
+    end
 
     -- Read the properties.
     if (props["S4A.SpellCheck.Language"] ~= "") then sLang = props["S4A.SpellCheck.Language"] end
@@ -75,7 +88,7 @@ function PersonalTools.SingleWordCheck()
         iStart, iEnd, sCurWord = string.find(sLine, sSearchPattern)
 
         while (iStart ~= nil) do
-            if ((iLineStart + iStart) <= iPos) and ((iLineStart + iEnd) >= iPos) then break end
+            if ((iLineStart + iStart - 1) <= iPos) and ((iLineStart + iEnd - 1) >= iPos) then break end
             iStart, iEnd, sCurWord = string.find(sLine, sSearchPattern, iEnd)
         end
 
@@ -95,13 +108,12 @@ function PersonalTools.SingleWordCheck()
     -- Clear any SpellChecking markings for the current word.
     iOldIndic = editor.IndicatorCurrent
     editor.IndicatorCurrent = iSpChkIndicator
-    editor:IndicatorClearRange((iLineStart + iStart), iEnd - iStart)
+    editor:IndicatorClearRange((iLineStart + iStart - 1), iEnd - iStart)
     editor.IndicatorCurrent = iOldIndic
 
     -- Delete the marker if there are no spelling errors remaining on the line.
-    if (editor:MarkerGet(iLine) & iMarkerMask ~= iMarkerMask) and
+    if ((editor:MarkerGet(iLine) & iMarkerMask) == iMarkerMask) and
         (editor:LineFromPosition(editor:IndicatorEnd(iSpChkIndicator, iLineStart)) ~= iLine) then editor:MarkerDelete(iLine, iMarker) end
-    -- if (editor:LineFromPosition(editor:IndicatorEnd(iSpChkIndicator, iLineStart)) ~= iLine) then editor:MarkerDelete(iLine, iMarker) end
 
     -- Execute the Spell Checking Script.
     _, _, iSignal = os.execute('"' .. sSpChkScript .. '"' .. " " .. sCurWord .. " " .. sLang .. " " .. sCountry .. " " .. "true" .. " " .. iMaxSuggestions)
@@ -195,9 +207,22 @@ function PersonalTools:CheckScript()
     local sLine, sText
     local asIgnoredWords = {}
     local hFile
-    local sSearchPattern = "[%s%p]?([$@]-[%w_]+['%.,-]?[%w_]+)[%s%p]?"
+
+    local accents = "àèìòùÀÈÌÒÙáéíóúýÁÉÍÓÚÝâêîôûÂÊÎÔÛãñõÃÑÕäëïöüÿÄËÏÖÜçÇßøØ"
+    local AlphaNumeric = "%w" .. accents
+    local Alpha = "%a" .. accents
+    -- Include periods, commas, and back/forward slashes to be able to skip URLs/paths.
+    -- In initial frontier and the first optional match, include @ and $ to catch and then filter out variables and macros.
+    -- Make the last capture group mandatory to optionally get hyphenated and apostrophied words without catching commas, periods etc after a word.
+    local pattern = "%f[%._%$@:#"..Alpha.."]([%._%$@:#"..Alpha.."]*[%.,'\\//_%-:]*["..AlphaNumeric.."]+)[^"..AlphaNumeric.."]"
+     local sSearchPattern = pattern
     local iMarkerMask = (1 << iMarker)
     local bUseMarkers = false
+
+    if (editor.Focus ~= true) then
+        output:AppendText("! Scite4AutoIt_LO_SpellChecker.au3 caret not in editor. -- Aborting\n")
+        return
+    end
 
     -- Expand the output screen if it is collapsed.
     if output.LinesOnScreen == 0 then scite.MenuCommand(IDM_TOGGLEOUTPUT) end
@@ -242,7 +267,7 @@ function PersonalTools:CheckScript()
     end
 
     -- Clear any previous spell checking marks.
-    self:ClearSpChk(true)
+    self.ClearSpChk(true)
 
     -- Open the Ignored Words file.
     hFile = io.open(sSpChkIgnoredWords, "r")
@@ -303,7 +328,8 @@ function PersonalTools:CheckScript()
                     if string.find(sText, "[%a]") and (string.find(sText,"[%.$#@_://\\]") == nil) and
                             (WordIsIgnored(sText) == false) then-- check if word is ignored.
                         -- insert the word into my file with its start and stop positions, separated by tabs.
-                        hFile:write(sText .. "\t" .. (iLineStart + iStart) .. "\t" .. (iLineStart + iEnd - 1) .. "\n")
+                        hFile:write(sText .. "\t" .. (iLineStart + iStart - 1) .. "\t" .. (iLineStart + iEnd - 1) .. "\n")
+                        -- hFile:write(sText .. "\t" .. (iLineStart + iStart) .. "\t" .. (iLineStart + iEnd - 1) .. "\n")
                     end
                 end
                 iStart, iEnd, sText = string.find(sLine, sSearchPattern, iEnd)
@@ -419,6 +445,11 @@ function PersonalTools.ClearSpChk(bInternalCall)
     local sMsg = " for range"
     local bClearAllMarkers = false
 
+    if (editor.Focus ~= true) then
+        output:AppendText("! Scite4AutoIt_LO_SpellChecker.au3 caret not in editor. -- Aborting\n")
+        return
+    end
+
     -- Expand the output screen if it is collapsed.
     if output.LinesOnScreen == 0 then scite.MenuCommand(IDM_TOGGLEOUTPUT) end
     if (bInternalCall ~= true) then output:AppendText("- Scite4AutoIt_LibreOffice_SpellChecker -\n") end
@@ -492,7 +523,15 @@ function PersonalTools:OnUserListSelection(iListType, sSel)
     if iListType == iMyListType then
         local iLine, iStart, iEnd, iLineStart
         local sLine
-        local sSearchPattern = "[%s%p]?([$@]-[%w_]+['%.,-]?[%w_]+)[%s%p]?"
+
+        local accents = "àèìòùÀÈÌÒÙáéíóúýÁÉÍÓÚÝâêîôûÂÊÎÔÛãñõÃÑÕäëïöüÿÄËÏÖÜçÇßøØ"
+        local AlphaNumeric = "%w" .. accents
+        local Alpha = "%a" .. accents
+        -- Include periods, commas, and back/forward slashes to be able to skip URLs/paths.
+        -- In initial frontier and the first optional match, include @ and $ to catch and then filter out variables and macros.
+        -- Make the last capture group mandatory to optionally get hyphenated and apostrophied words without catching commas, periods etc after a word.
+        local pattern = "%f[%._%$@:#"..Alpha.."]([%._%$@:#"..Alpha.."]*[%.,'\\//_%-:]*["..AlphaNumeric.."]+)[^"..AlphaNumeric.."]"
+        local sSearchPattern = pattern
         local iPos = editor.CurrentPos
 
         if (editor.SelectionStart == editor.SelectionEnd) then -- No Selection.
@@ -506,12 +545,12 @@ function PersonalTools:OnUserListSelection(iListType, sSel)
             if (iStart == nil) then return output:AppendText("! Failed to identify valid word to replace.\n") end
 
             while (iStart ~= nil) do
-                if ((iLineStart + iStart) <= iPos) and ((iLineStart + iEnd) >= iPos) then break end
+                if ((iLineStart + iStart - 1) <= iPos) and ((iLineStart + iEnd - 1) >= iPos) then break end
 
                 iStart, iEnd = string.find(sLine, sSearchPattern, iEnd)
             end
 
-            editor:SetTargetRange((iLineStart + iStart), (iLineStart + iEnd - 1))
+            editor:SetTargetRange((iLineStart + iStart - 1), (iLineStart + iEnd - 1))
 
         else -- Selected word replace.
             editor:SetTargetRange(editor.SelectionStart, editor.SelectionEnd)
@@ -528,6 +567,5 @@ function PersonalTools:OnUserListSelection(iListType, sSel)
 
         -- Lexer the new word.
         editor:Colourise(editor.CurrentPos - string.len(sSel), editor.CurrentPos)
-
     end
 end
