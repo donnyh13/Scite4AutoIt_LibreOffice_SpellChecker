@@ -21,9 +21,9 @@ Go to [legend](#legend---types-of-changes) for further information about the typ
 
 ### Changed
 
-- Changed the fourth parameter from a Boolean to a String.
+- Changed the fourth parameter passed to AutoIt script from a Boolean to a String.
 - Attempted to simplify the AutoIt Script.
-- Moved some repeated variables to top of script file for easier modification.
+- Moved some repeated lua variables to top of script file for easier modification.
 
 ### Documented
 
