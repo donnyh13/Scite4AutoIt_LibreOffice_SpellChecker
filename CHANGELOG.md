@@ -23,6 +23,7 @@ Go to [legend](#legend---types-of-changes) for further information about the typ
 
 - Changed the fourth parameter from a Boolean to a String.
 - Attempted to simplify the AutoIt Script.
+- Moved some repeated variables to top of script file for easier modification.
 
 ### Documented
 

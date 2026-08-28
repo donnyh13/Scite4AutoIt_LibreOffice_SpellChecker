@@ -3,6 +3,28 @@
 PersonalTools = EventClass:new(Common)
 -------------------------------------------------------------------------------
 
+    -- Settings that can be modified for compatibility with other LUA Scripts.
+    local iSpChkIndicator = 10
+    local iMarker = 18
+    local iListType = 18
+    --##########################
+
+-- File variables
+local sSciteUserHome = props["SciteUserHome"]
+local sSpChkScript = sSciteUserHome .. "\\Scite4AutoIt_LO_SpellChecker\\Scite4AutoIt_LO_SpellChecker.au3"
+local sSpChkWordList = sSciteUserHome .. "\\Scite4AutoIt_LO_SpellChecker\\Scite4AutoIt_LO_SpellChecker.ini"
+local sSpChkErrorFile = sSciteUserHome ..  "\\Scite4AutoIt_LO_SpellChecker\\Scite4AutoIt_LO_SpellChecker_ERROR.ini"
+local sSpChkIgnoredWords = sSciteUserHome .. "\\Scite4AutoIt_LO_SpellChecker\\Scite4AutoIt_LO_IgnoredWords.ini"
+
+local accents = "àèìòùÀÈÌÒÙáéíóúýÁÉÍÓÚÝâêîôûÂÊÎÔÛãñõÃÑÕäëïöüÿÄËÏÖÜçÇßøØ"
+local AlphaNumeric = "%w" .. accents
+local Alpha = "%a" .. accents
+-- Include periods, commas, and back/forward slashes to be able to skip URLs/paths.
+-- In initial frontier and the first optional match, include @ and $ to catch and then filter out variables and macros.
+-- Make the last capture group mandatory to optionally get hyphenated and apostrophied words without catching commas, periods etc after a word.
+local pattern = "%f[%._%$@:#"..Alpha.."]([%._%$@:#"..Alpha.."]*[%.,'\\//_%-:]*["..AlphaNumeric.."]+)[^"..AlphaNumeric.."]"
+local sSearchPattern = pattern
+
 --------------------------------------------------------------------------------
 -- SingleWordCheck
 --
@@ -18,15 +40,6 @@ PersonalTools = EventClass:new(Common)
 --
 --------------------------------------------------------------------------------
 function PersonalTools.SingleWordCheck()
-    -- Settings that can be modified for compatibility with other LUA Scripts.
-    local iSpChkIndicator = 10
-    local iListType = 18
-    local iMarker = 18
-    --##########################
-    local sSciteUserHome = props["SciteUserHome"]
-    local sSpChkScript = sSciteUserHome .. "\\Scite4AutoIt_LO_SpellChecker\\Scite4AutoIt_LO_SpellChecker.au3"
-    local sSpChkWordList = sSciteUserHome .. "\\Scite4AutoIt_LO_SpellChecker\\Scite4AutoIt_LO_SpellChecker.ini"
-    local sSpChkErrorFile = sSciteUserHome ..  "\\Scite4AutoIt_LO_SpellChecker\\Scite4AutoIt_LO_SpellChecker_ERROR.ini"
     local sCurWord, sLine
     local iSignal,  iOldIndic, iLine, iLineStart, iLineEnd, iPos, iStart, iEnd
     local iCount, iMaxSuggestions = 0, 10
@@ -36,14 +49,6 @@ function PersonalTools.SingleWordCheck()
     local hFile
     local old_separator
 
-    local accents = "àèìòùÀÈÌÒÙáéíóúýÁÉÍÓÚÝâêîôûÂÊÎÔÛãñõÃÑÕäëïöüÿÄËÏÖÜçÇßøØ"
-    local AlphaNumeric = "%w" .. accents
-    local Alpha = "%a" .. accents
-    -- Include periods, commas, and back/forward slashes to be able to skip URLs/paths.
-    -- In initial frontier and the first optional match, include @ and $ to catch and then filter out variables and macros.
-    -- Make the last capture group mandatory to optionally get hyphenated and apostrophied words without catching commas, periods etc after a word.
-    local pattern = "%f[%._%$@:#"..Alpha.."]([%._%$@:#"..Alpha.."]*[%.,'\\//_%-:]*["..AlphaNumeric.."]+)[^"..AlphaNumeric.."]"
-    local sSearchPattern = pattern
     local iMarkerMask = (1 << iMarker)
 
     if (editor.Focus ~= true) then
@@ -174,15 +179,6 @@ end
 --
 --------------------------------------------------------------------------------
 function PersonalTools.CheckScript()
-    -- Settings that can be modified for compatibility with other LUA Scripts.
-    local iSpChkIndicator = 10
-    local iMarker = 18
-    --##########################
-    local sSciteUserHome = props["SciteUserHome"]
-    local sSpChkScript = sSciteUserHome .. "\\Scite4AutoIt_LO_SpellChecker\\Scite4AutoIt_LO_SpellChecker.au3"
-    local sSpChkWordList = sSciteUserHome .. "\\Scite4AutoIt_LO_SpellChecker\\Scite4AutoIt_LO_SpellChecker.ini"
-    local sSpChkIgnoredWords = sSciteUserHome .. "\\Scite4AutoIt_LO_SpellChecker\\Scite4AutoIt_LO_IgnoredWords.ini"
-    local sSpChkErrorFile = sSciteUserHome ..  "\\Scite4AutoIt_LO_SpellChecker\\Scite4AutoIt_LO_SpellChecker_ERROR.ini"
     local iLineStart, iLineEnd, iWordStart, iWordEnd, iCStyle, iOldIndic, iSignal, iStart, iEnd, iFirstLine, iLastLine
     local iCount, iMaxSuggestions = 0, 10
     local iTimer = os.clock()
@@ -191,14 +187,6 @@ function PersonalTools.CheckScript()
     local asIgnoredWords = {}
     local hFile
 
-    local accents = "àèìòùÀÈÌÒÙáéíóúýÁÉÍÓÚÝâêîôûÂÊÎÔÛãñõÃÑÕäëïöüÿÄËÏÖÜçÇßøØ"
-    local AlphaNumeric = "%w" .. accents
-    local Alpha = "%a" .. accents
-    -- Include periods, commas, and back/forward slashes to be able to skip URLs/paths.
-    -- In initial frontier and the first optional match, include @ and $ to catch and then filter out variables and macros.
-    -- Make the last capture group mandatory to optionally get hyphenated and apostrophied words without catching commas, periods etc after a word.
-    local pattern = "%f[%._%$@:#"..Alpha.."]([%._%$@:#"..Alpha.."]*[%.,'\\//_%-:]*["..AlphaNumeric.."]+)[^"..AlphaNumeric.."]"
-    local sSearchPattern = pattern
     local iMarkerMask = (1 << iMarker)
     local bUseMarkers = false
 
@@ -323,7 +311,7 @@ function PersonalTools.CheckScript()
 
         hFile = io.open(sSpChkWordList, "r")
 
-        if bUseMarkers then 
+        if bUseMarkers then
             editor:MarkerDefine(iMarker, 32) -- 32 = downward flag.
             editor.MarkerFore[iMarker] = "0x000000"
             editor.MarkerBack[iMarker] = "0x0000FF"
@@ -387,10 +375,6 @@ end
 --
 --------------------------------------------------------------------------------
 function PersonalTools.ClearSpChk(bInternalCall)
-    -- Settings that can be modified for compatibility with other LUA Scripts.
-    local iSpChkIndicator = 10
-    local iMarker = 18
-    --##########################
     local iOldIndic, iStartSel, iEndSel, iFirstLine, iLastLine, iFoundLine, iLineStart
     local iTimer = os.clock()
     local iMarkerMask = (1 << iMarker)
@@ -457,26 +441,15 @@ end
 -- Replaces the current word with the Selection made in a User List.
 --
 -- Parameters:
---	iListType - The User List Type.
+--	iUserListType - The User List Type.
 --	sSel - The word selected by the user from the User List.
 --------------------------------------------------------------------------------
-function PersonalTools.OnUserListSelection(iListType, sSel)
-    -- Settings that can be modified for compatibility with other LUA Scripts.
-    local iMyListType = 18
-    --##########################
-    -- The List Style I use for Spelling suggestions is 18, if the list is mine, perform the word replacement.
-    if iListType == iMyListType then
+function PersonalTools.OnUserListSelection(iUserListType, sSel)
+    -- The List Style I use for Spelling suggestions is 18 (unless modified by the user), if the list is mine, perform the word replacement.
+    if iUserListType == iListType then
         local iLine, iStart, iEnd, iLineStart
         local sLine
 
-        local accents = "àèìòùÀÈÌÒÙáéíóúýÁÉÍÓÚÝâêîôûÂÊÎÔÛãñõÃÑÕäëïöüÿÄËÏÖÜçÇßøØ"
-        local AlphaNumeric = "%w" .. accents
-        local Alpha = "%a" .. accents
-        -- Include periods, commas, and back/forward slashes to be able to skip URLs/paths.
-        -- In initial frontier and the first optional match, include @ and $ to catch and then filter out variables and macros.
-        -- Make the last capture group mandatory to optionally get hyphenated and apostrophied words without catching commas, periods etc after a word.
-        local pattern = "%f[%._%$@:#"..Alpha.."]([%._%$@:#"..Alpha.."]*[%.,'\\//_%-:]*["..AlphaNumeric.."]+)[^"..AlphaNumeric.."]"
-        local sSearchPattern = pattern
         local iPos = editor.CurrentPos
 
         if (editor.SelectionStart == editor.SelectionEnd) then
