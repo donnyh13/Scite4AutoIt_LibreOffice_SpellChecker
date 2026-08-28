@@ -46,7 +46,7 @@ function PersonalTools.SingleWordCheck()
     local iMarkerMask = (1 << iMarker)
 
     if (editor.Focus ~= true) then
-        output:AppendText("! Scite4AutoIt_LO_SpellChecker.au3 caret not in editor. -- Aborting\n")
+        output:AppendText("! Caret not in editor. -- Aborting\n")
         return
     end
 
@@ -116,7 +116,7 @@ function PersonalTools.SingleWordCheck()
         (editor:LineFromPosition(editor:IndicatorEnd(iSpChkIndicator, iLineStart)) ~= iLine) then editor:MarkerDelete(iLine, iMarker) end
 
     -- Execute the Spell Checking Script.
-    _, _, iSignal = os.execute('"' .. sSpChkScript .. '"' .. " " .. sCurWord .. " " .. sLang .. " " .. sCountry .. " " .. "true" .. " " .. iMaxSuggestions)
+    _, _, iSignal = os.execute('"' .. sSpChkScript .. '"' .. " " .. sCurWord .. " " .. sLang .. " " .. sCountry .. " " .. "single" .. " " .. iMaxSuggestions)
 
     -- iSignal will be either, 0 = Word is spelled correctly, 1 = word it misspelled, or 2 = An error occurred executing Spell Check Script.
     if (iSignal == 0) then
@@ -341,7 +341,7 @@ function PersonalTools:CheckScript()
     hFile:close()
 
     -- Run my Spell Check script.
-    _, _, iSignal = os.execute('"' .. sSpChkScript .. '" ' .. "## " .. sLang .. " " .. sCountry .. " " .. "false " .. iMaxSuggestions)
+    _, _, iSignal = os.execute('"' .. sSpChkScript .. '" ' .. "## " .. sLang .. " " .. sCountry .. " " .. "multi " .. iMaxSuggestions)
 
     -- iSignal will be either, 0 = Words are spelled correctly, 1 = words are misspelled, or 2 = An error occurred executing Spell Check Script.
     if (iSignal == 0) then

@@ -11,10 +11,23 @@ Go to [legend](#legend---types-of-changes) for further information about the typ
 
 |    Version           |    Changes                              |    Download                    |     Released   |    Compare on GitHub       |
 |:---------------------|:---------------------------------------:|:------------------------------:|:--------------:|:---------------------------|
-|    **v0.2.0**        | [Change Log](#020---2026-08-23)         | [v0.1.0][v0.2.0]               | 2026-08-23     | [Compare][v0.2.0-Compare]  |
-|    **v0.1.1**        | [Change Log](#011---2024-05-01)         | [v0.1.0][v0.1.1]               | 2024-05-01     | [Compare][v0.1.1-Compare]  |
+|    **v0.2.1**        | [Change Log](#021---2026-)              | [v0.2.1][v0.2.1]               | _Unreleased_   | [Compare][v0.2.1-Compare]  |
+|    **v0.2.0**        | [Change Log](#020---2026-08-23)         | [v0.2.0][v0.2.0]               | 2026-08-23     | [Compare][v0.2.0-Compare]  |
+|    **v0.1.1**        | [Change Log](#011---2024-05-01)         | [v0.1.1][v0.1.1]               | 2024-05-01     | [Compare][v0.1.1-Compare]  |
 |    **v0.1.0**        | [Change Log](#010---2024-04-26)         | [v0.1.0][v0.1.0]               | 2024-04-26     | [Compare][v0.1.0-Compare]  |
 |    **v0.0.1-alpha**  | [Change Log](#001-alpha---2023-12-20)   | [v0.0.1-alpha][v0.0.1-alpha]   | 2023-12-20     |                            |
+
+## [0.2.1] - 2026-
+
+### Changed
+
+- Changed the fourth parameter from a Boolean to a String.
+- Attempted to simplify the AutoIt Script.
+
+### Documented
+
+- Corrected wrong version numbers in Changelog.
+- Attempted to add better Documentation comments.
 
 ## [0.2.0] - 2026-08-23
 
@@ -103,7 +116,9 @@ Go to [legend](#legend---types-of-changes) for further information about the typ
 [v0.1.0-Compare]: https://github.com/donnyh13/Scite4AutoIt_LibreOffice_SpellChecker/compare/v0.0.1-alpha...v0.1.0
 [v0.1.1-Compare]: https://github.com/donnyh13/Scite4AutoIt_LibreOffice_SpellChecker/compare/v0.1.0...v0.1.1
 [v0.2.0-Compare]: https://github.com/donnyh13/Scite4AutoIt_LibreOffice_SpellChecker/compare/v0.1.1...v0.2.0
+[v0.2.1-Compare]: https://github.com/donnyh13/Scite4AutoIt_LibreOffice_SpellChecker/compare/v0.2.0...main
 
+[v0.2.1]: https://github.com/donnyh13/Scite4AutoIt_LibreOffice_SpellChecker
 [v0.2.0]: https://github.com/donnyh13/Scite4AutoIt_LibreOffice_SpellChecker/releases/tag/v0.2.0
 [v0.1.1]: https://github.com/donnyh13/Scite4AutoIt_LibreOffice_SpellChecker/releases/tag/v0.1.1
 [v0.1.0]: https://github.com/donnyh13/Scite4AutoIt_LibreOffice_SpellChecker/releases/tag/v0.1.0
