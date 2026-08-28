@@ -29,6 +29,12 @@ Go to [legend](#legend---types-of-changes) for further information about the typ
 - Corrected wrong version numbers in Changelog.
 - Attempted to add better Documentation comments.
 
+### Fixed
+
+- Wrong file being created if it didn't exist.
+- Wrong lua dot vs colon usage.
+- Buggy timer usage.
+
 ## [0.2.0] - 2026-08-23
 
 ### Changed
