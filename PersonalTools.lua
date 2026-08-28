@@ -29,7 +29,8 @@ function PersonalTools.SingleWordCheck()
     local sSpChkErrorFile = sSciteUserHome ..  "\\Scite4AutoIt_LO_SpellChecker\\Scite4AutoIt_LO_SpellChecker_ERROR.ini"
     local sCurWord, sLine
     local iSignal,  iOldIndic, iLine, iLineStart, iLineEnd, iPos, iStart, iEnd
-    local iCount, iTimer, iMaxSuggestions = 0, os.clock(), 10
+    local iCount, iMaxSuggestions = 0, 10
+    local iTimer = os.clock()
     local sLang, sCountry = "en", "US"
     local aWords = {}
     local hFile
@@ -59,7 +60,7 @@ function PersonalTools.SingleWordCheck()
     if output.LinesOnScreen == 0 then scite.MenuCommand(IDM_TOGGLEOUTPUT) end
     output:AppendText("- Scite4AutoIt_LibreOffice_SpellChecker -\n")
 
-    --Check if all necessary files exist.
+    -- Check if all necessary files exist.
     hFile = io.open(sSpChkScript, "r")
     if (hFile == nil) then
         output:AppendText("! Scite4AutoIt_LO_SpellChecker.au3 file missing. -- Aborting\n")
@@ -76,14 +77,13 @@ function PersonalTools.SingleWordCheck()
 
     iPos = editor.CurrentPos
     iLine = editor:LineFromPosition(iPos)
-    -- Retrieve the Line start and end positions.
+
     iLineStart = editor:PositionFromLine(iLine)
     iLineEnd = editor.LineEndPosition[iLine]
 
-    if (iLineStart == iLineEnd) then return output:AppendText("! Current line is empty. " .. string.sub(string.format(os.clock() - iTimer), 1, 4) .. " Seconds.\n") end
+    if (iLineStart == iLineEnd) then return output:AppendText("! Current line is empty. " .. string.format("%.2f", os.clock() - iTimer) .. " Seconds.\n") end
 
     if (editor.SelectionStart == editor.SelectionEnd) then
-
         sLine = editor:GetLine(iLine)
         iStart, iEnd, sCurWord = string.find(sLine, sSearchPattern)
 
@@ -92,20 +92,17 @@ function PersonalTools.SingleWordCheck()
             iStart, iEnd, sCurWord = string.find(sLine, sSearchPattern, iEnd)
         end
 
-        if (iStart == nil) then return output:AppendText("! Failed to identify valid word at cursor. " .. string.sub(string.format(os.clock() - iTimer), 1, 4) .. " Seconds.\n") end
-
-    else -- Selected word check.
+        if (iStart == nil) then return output:AppendText("! Failed to identify valid word at cursor. " .. string.format("%.2f", os.clock() - iTimer) .. " Seconds.\n") end
+    else
         iStart = editor.SelectionStart
         iEnd = editor.SelectionEnd
         editor:SetTargetRange(iStart, iEnd)
 
         iStart = iStart - iLineStart
         iEnd = iEnd - iLineStart
-        -- Retrieve the selected word.
         sCurWord = string.gsub(editor.TargetText, " ", "")
     end
 
-    -- Clear any SpellChecking markings for the current word.
     iOldIndic = editor.IndicatorCurrent
     editor.IndicatorCurrent = iSpChkIndicator
     editor:IndicatorClearRange((iLineStart + iStart - 1), iEnd - iStart)
@@ -115,26 +112,20 @@ function PersonalTools.SingleWordCheck()
     if ((editor:MarkerGet(iLine) & iMarkerMask) == iMarkerMask) and
         (editor:LineFromPosition(editor:IndicatorEnd(iSpChkIndicator, iLineStart)) ~= iLine) then editor:MarkerDelete(iLine, iMarker) end
 
-    -- Execute the Spell Checking Script.
     _, _, iSignal = os.execute('"' .. sSpChkScript .. '"' .. " " .. sCurWord .. " " .. sLang .. " " .. sCountry .. " " .. "single" .. " " .. iMaxSuggestions)
 
     -- iSignal will be either, 0 = Word is spelled correctly, 1 = word it misspelled, or 2 = An error occurred executing Spell Check Script.
     if (iSignal == 0) then
-       output:AppendText("+ The word " .. '"' .. sCurWord .. '"' .. " is spelled correctly." .. "\n")
-
+        output:AppendText("+ The word " .. '"' .. sCurWord .. '"' .. " is spelled correctly." .. "\n")
     elseif (iSignal == 1) then
-
         -- Open and read the Spell Check Word List that will contain a list of suggested words.
         hFile = io.open(sSpChkWordList, "r")
-
         repeat
             sLine = hFile:read("l")
-
             if (sLine ~= nil) and (sLine ~= "") then
-                table.insert(aWords,sLine)
+                table.insert(aWords, sLine)
                 iCount = iCount + 1
             end
-
         until (sLine == nil)
 
         io.close(hFile)
@@ -145,15 +136,11 @@ function PersonalTools.SingleWordCheck()
             editor:UserListShow(iListType, table.concat(aWords, ';'))
             editor.AutoCSeparator = old_separator
             output:AppendText("> The word " .. '"' .. sCurWord .. '"' .. " is misspelled, found " .. iCount .. " suggestion(s)." .. "\n")
-
         else
             output:AppendText("! The word " .. '"' .. sCurWord .. '"' .. " is misspelled, but found no spelling suggestions." .. "\n")
-
-       end
-
-    else -- Error of some form.
+        end
+    else
         output:AppendText("! Scite4AutoIt_LibreOffice_SpellChecker encountered an Error." .. "\n")
-
         -- Open the Error file and read the errors the Au3 Script encountered, and output them.
         hFile = io.open(sSpChkErrorFile, "r")
         if (hFile == nil) then
@@ -162,20 +149,15 @@ function PersonalTools.SingleWordCheck()
         end
         repeat
             sLine = hFile:read("l")
-
             if (sLine ~= nil) and (sLine ~= "") then
                 output:AppendText("! " .. sLine .. "\n")
             end
-
         until (sLine == nil)
-
         io.close(hFile)
-
-        -- Delete the error log file.
         os.remove(sSpChkErrorFile)
     end
 
-    output:AppendText("++ Scite4AutoIt_LibreOffice_SpellChecker completed. " .. string.sub(string.format(os.clock() - iTimer), 1, 4) .. " Seconds. ++\n")
+    output:AppendText("++ Scite4AutoIt_LibreOffice_SpellChecker completed. " .. string.format("%.2f", os.clock() - iTimer) .. " Seconds. ++\n")
 end
 
 --------------------------------------------------------------------------------
@@ -191,7 +173,7 @@ end
 --command.46.$(au3)=InvokeTool PersonalTools.CheckScript
 --
 --------------------------------------------------------------------------------
-function PersonalTools:CheckScript()
+function PersonalTools.CheckScript()
     -- Settings that can be modified for compatibility with other LUA Scripts.
     local iSpChkIndicator = 10
     local iMarker = 18
@@ -202,7 +184,8 @@ function PersonalTools:CheckScript()
     local sSpChkIgnoredWords = sSciteUserHome .. "\\Scite4AutoIt_LO_SpellChecker\\Scite4AutoIt_LO_IgnoredWords.ini"
     local sSpChkErrorFile = sSciteUserHome ..  "\\Scite4AutoIt_LO_SpellChecker\\Scite4AutoIt_LO_SpellChecker_ERROR.ini"
     local iLineStart, iLineEnd, iWordStart, iWordEnd, iCStyle, iOldIndic, iSignal, iStart, iEnd, iFirstLine, iLastLine
-    local iCount, iMaxSuggestions, iTimer  = 0, 10, os.clock()
+    local iCount, iMaxSuggestions = 0, 10
+    local iTimer = os.clock()
     local sLang, sCountry, sHighlight = "en", "US", "0xFF00FF"
     local sLine, sText
     local asIgnoredWords = {}
@@ -215,7 +198,7 @@ function PersonalTools:CheckScript()
     -- In initial frontier and the first optional match, include @ and $ to catch and then filter out variables and macros.
     -- Make the last capture group mandatory to optionally get hyphenated and apostrophied words without catching commas, periods etc after a word.
     local pattern = "%f[%._%$@:#"..Alpha.."]([%._%$@:#"..Alpha.."]*[%.,'\\//_%-:]*["..AlphaNumeric.."]+)[^"..AlphaNumeric.."]"
-     local sSearchPattern = pattern
+    local sSearchPattern = pattern
     local iMarkerMask = (1 << iMarker)
     local bUseMarkers = false
 
@@ -228,7 +211,6 @@ function PersonalTools:CheckScript()
     if output.LinesOnScreen == 0 then scite.MenuCommand(IDM_TOGGLEOUTPUT) end
     output:AppendText("- Scite4AutoIt_LibreOffice_SpellChecker -\n")
 
-    --Check if all necessary files exist.
     hFile = io.open(sSpChkScript, "r")
     if (hFile == nil) then
         output:AppendText("! Scite4AutoIt_LO_SpellChecker.au3 file missing. -- Aborting\n")
@@ -246,13 +228,12 @@ function PersonalTools:CheckScript()
     hFile = io.open(sSpChkIgnoredWords, "r")
     if (hFile == nil) then
         output:AppendText("! Scite4AutoIt_LO_IgnoredWords.ini file missing -- Creating file.\n")
-        hFile = io.open(sSpChkWordList, "w")
+        hFile = io.open(sSpChkIgnoredWords, "w")
     end
     io.close(hFile)
 
-    -- Read the properties.
-    if (props["S4A.SpellCheck.Language"] ~= "") then sLang = string.gsub(props["S4A.SpellCheck.Language"], " ", "") end -- Strip spaces
-    if (props["S4A.SpellCheck.Country"] ~= "") then sCountry = string.gsub(props["S4A.SpellCheck.Country"], " ", "") end -- Strip spaces
+    if (props["S4A.SpellCheck.Language"] ~= "") then sLang = string.gsub(props["S4A.SpellCheck.Language"], " ", "") end
+    if (props["S4A.SpellCheck.Country"] ~= "") then sCountry = string.gsub(props["S4A.SpellCheck.Country"], " ", "") end
     if (props["S4A.SpellCheck.MaxSuggestions"] ~= "") then iMaxSuggestions = props["S4A.SpellCheck.MaxSuggestions"] end
     if (props["S4A.SpellCheck.UseMarkers"] ~= "n") then bUseMarkers = true end
     if (props["S4A.SpellCheck.Highlight"] ~= "") then
@@ -267,32 +248,26 @@ function PersonalTools:CheckScript()
     end
 
     -- Clear any previous spell checking marks.
-    self.ClearSpChk(true)
+    PersonalTools.ClearSpChk(true)
 
-    -- Open the Ignored Words file.
     hFile = io.open(sSpChkIgnoredWords, "r")
-
     repeat
         sLine = hFile:read("l")
-
         if (sLine ~= nil) and (sLine ~= "") then
             sLine = string.gsub(sLine," ", "")
             table.insert(asIgnoredWords, sLine)
         end
-
     until (sLine == nil)
-
     io.close(hFile)
 
     -- ## WordIsIgnored Func ##
     -- Function for checking if a word is on the ignored list.
-    function WordIsIgnored(sWord)
+    local function WordIsIgnored(sWord)
         for k = 1, #asIgnoredWords do
             if (asIgnoredWords[k] == sWord) then return true end
         end
         return false
-        end
-    -- ## WordIsIgnored Func ##
+    end
 
     -- Lexer the entire script so all is styled correctly so this script can determine where comments, strings etc are.
     editor:Colourise(0, -1)
@@ -300,7 +275,6 @@ function PersonalTools:CheckScript()
     if (editor.SelectionStart == editor.SelectionEnd) then
         iFirstLine = 0
         iLastLine = editor.LineCount
-
     else
         iFirstLine = editor:LineFromPosition(editor.SelectionStart)
         iLastLine = editor:LineFromPosition(editor.SelectionEnd)
@@ -308,16 +282,11 @@ function PersonalTools:CheckScript()
 
     -- Open and write the words to check to my Check Words file.
     hFile = io.open(sSpChkWordList, "w")
-
-    -- Cycle through the Script lines beginning at the beginning.
     for iLine = iFirstLine, iLastLine do
-
-        -- Retrieve the Line start and end positions.
         iLineStart = editor:PositionFromLine(iLine)
         iLineEnd = editor.LineEndPosition[iLine]
 
         if (iLineStart ~= iLineEnd) then
-
             sLine = editor:GetLine(iLine)
             iStart, iEnd, sText = string.find(sLine, sSearchPattern)
 
@@ -326,10 +295,9 @@ function PersonalTools:CheckScript()
                 if (iCStyle == SCE_AU3_COMMENT) or (iCStyle == SCE_AU3_COMMENTBLOCK) or (iCStyle == SCE_AU3_STRING) then
                     -- If the String contains letters, but not a period, $, #, @, _, :, / or \ then check the word if it is spelled correctly.
                     if string.find(sText, "[%a]") and (string.find(sText,"[%.$#@_://\\]") == nil) and
-                            (WordIsIgnored(sText) == false) then-- check if word is ignored.
                         -- insert the word into my file with its start and stop positions, separated by tabs.
+                            (WordIsIgnored(sText) == false) then
                         hFile:write(sText .. "\t" .. (iLineStart + iStart - 1) .. "\t" .. (iLineStart + iEnd - 1) .. "\n")
-                        -- hFile:write(sText .. "\t" .. (iLineStart + iStart) .. "\t" .. (iLineStart + iEnd - 1) .. "\n")
                     end
                 end
                 iStart, iEnd, sText = string.find(sLine, sSearchPattern, iEnd)
@@ -340,16 +308,12 @@ function PersonalTools:CheckScript()
     hFile:flush()
     hFile:close()
 
-    -- Run my Spell Check script.
     _, _, iSignal = os.execute('"' .. sSpChkScript .. '" ' .. "## " .. sLang .. " " .. sCountry .. " " .. "multi " .. iMaxSuggestions)
 
     -- iSignal will be either, 0 = Words are spelled correctly, 1 = words are misspelled, or 2 = An error occurred executing Spell Check Script.
     if (iSignal == 0) then
         output:AppendText("+ No Spelling mistakes found.\n")
-
     elseif (iSignal == 1) then
-
-        -- Set up the Spell Checking indicator.
         iOldIndic = editor.IndicatorCurrent
         editor.IndicatorCurrent = iSpChkIndicator
         editor.IndicStyle[iSpChkIndicator] = INDIC_STRAIGHTBOX
@@ -357,7 +321,6 @@ function PersonalTools:CheckScript()
         editor.IndicAlpha[iSpChkIndicator] = 100
         editor.IndicOutlineAlpha[iSpChkIndicator] = 100
 
-        -- Open and read the Word list of misspelled words.
         hFile = io.open(sSpChkWordList, "r")
 
         if bUseMarkers then 
@@ -369,29 +332,24 @@ function PersonalTools:CheckScript()
         editor:BeginUndoAction()
         repeat
             sLine = hFile:read("l")
-
             if (sLine ~= nil) and (sLine ~= "") then
                 -- Identify the misspelled words start/end Position. They will be located after the first and second tab.
                 _, _, iWordStart, iWordEnd = string.find(sLine, "\t([%d]+)\t([%d]+)")
-                -- Mark the word.
                 editor:IndicatorFillRange(iWordStart, iWordEnd - iWordStart)
-                if bUseMarkers and ((editor:MarkerGet(editor:LineFromPosition(iWordStart)) & iMarkerMask) ~= iMarkerMask) then -- If Marker not already present, add one.
+                if bUseMarkers and ((editor:MarkerGet(editor:LineFromPosition(iWordStart)) & iMarkerMask) ~= iMarkerMask) then
                     editor:MarkerAdd(editor:LineFromPosition(iWordStart), iMarker)
                 end
                 -- Unfold any folds the word is in.
                 editor:EnsureVisible(editor:LineFromPosition(iWordStart))
                 iCount = iCount + 1
-
             end
         until (sLine == nil)
         editor:EndUndoAction()
         hFile:close()
         output:AppendText("> Found " .. iCount .. " misspelled word(s).\n")
         editor.IndicatorCurrent = iOldIndic
-
-    else -- Error of some form.
+    else
         output:AppendText("! Scite4AutoIt_LibreOffice_SpellChecker encountered an Error." .. "\n")
-
         -- Open the Error file and read the errors the Au3 Script encountered, and output them.
         hFile = io.open(sSpChkErrorFile, "r")
         if (hFile == nil) then
@@ -401,21 +359,15 @@ function PersonalTools:CheckScript()
 
         repeat
             sLine = hFile:read("l")
-
             if (sLine ~= nil) and (sLine ~= "") then
                 output:AppendText("! " .. sLine .. "\n")
             end
-
         until (sLine == nil)
-
         io.close(hFile)
-
-        -- Delete the error log.
         os.remove(sSpChkErrorFile)
-
     end
 
-    output:AppendText("++ Scite4AutoIt_LibreOffice_SpellChecker completed. " .. string.sub(string.format(os.clock() - iTimer), 1, 4) .. " Seconds. ++\n")
+    output:AppendText("++ Scite4AutoIt_LibreOffice_SpellChecker completed. " .. string.format("%.2f", os.clock() - iTimer) .. " Seconds. ++\n")
 end
 
 --------------------------------------------------------------------------------
@@ -466,44 +418,37 @@ function PersonalTools.ClearSpChk(bInternalCall)
 
     iOldIndic = editor.IndicatorCurrent
     editor.IndicatorCurrent = iSpChkIndicator
-    editor:IndicatorClearRange(iStartSel, iEndSel - iStartSel) -- Clear any previous spell checking marks for the desired range.
+    editor:IndicatorClearRange(iStartSel, iEndSel - iStartSel)
 
     if bClearAllMarkers then
         editor:MarkerDeleteAll(iMarker)
-
-    else -- Remove markers for a range.
+    else
         iFirstLine = editor:LineFromPosition(iStartSel)
         iLastLine = editor:LineFromPosition(iEndSel)
-
         iFoundLine = editor:MarkerNext(iFirstLine, iMarkerMask)
 
         while (iFoundLine ~= -1) do
             if ((iFoundLine < iFirstLine) or (iFoundLine > iLastLine)) then break end
 
             if (iFoundLine == iFirstLine) or (iFoundLine == iLastLine) then
-
                 iLineStart = editor:PositionFromLine(iFoundLine)
-                if (editor:LineFromPosition(editor:IndicatorEnd(iSpChkIndicator, iLineStart)) ~= iFoundLine) then -- Delete the marker if there are no spelling errors remaining on the line.
+                if (editor:LineFromPosition(editor:IndicatorEnd(iSpChkIndicator, iLineStart)) ~= iFoundLine) then
                     editor:MarkerDelete(iFoundLine, iMarker)
                 else
                     iFoundLine = iFoundLine + 1
-
                 end
-
             else
                 editor:MarkerDelete(iFoundLine, iMarker)
-
             end
 
             iFoundLine = editor:MarkerNext(iFoundLine, iMarkerMask)
         end
-
     end
 
     output:AppendText("> Spell Check markings successfully cleared" .. sMsg .. ".\n")
     editor.IndicatorCurrent = iOldIndic
 
-    if (bInternalCall ~= true) then output:AppendText("++ Scite4AutoIt_LibreOffice_SpellChecker completed. " .. string.sub(string.format(os.clock() - iTimer), 1, 4) .. " Seconds. ++\n") end
+    if (bInternalCall ~= true) then output:AppendText("++ Scite4AutoIt_LibreOffice_SpellChecker completed. " .. string.format("%.2f", os.clock() - iTimer) .. " Seconds. ++\n") end
 end
 
 -------------------------------------------------------------------------------
@@ -515,7 +460,7 @@ end
 --	iListType - The User List Type.
 --	sSel - The word selected by the user from the User List.
 --------------------------------------------------------------------------------
-function PersonalTools:OnUserListSelection(iListType, sSel)
+function PersonalTools.OnUserListSelection(iListType, sSel)
     -- Settings that can be modified for compatibility with other LUA Scripts.
     local iMyListType = 18
     --##########################
@@ -534,11 +479,9 @@ function PersonalTools:OnUserListSelection(iListType, sSel)
         local sSearchPattern = pattern
         local iPos = editor.CurrentPos
 
-        if (editor.SelectionStart == editor.SelectionEnd) then -- No Selection.
+        if (editor.SelectionStart == editor.SelectionEnd) then
             iLine = editor:LineFromPosition(iPos)
-            -- Retrieve the Line start and end positions.
             iLineStart = editor:PositionFromLine(iLine)
-
             sLine = editor:GetLine(iLine)
             iStart, iEnd = string.find(sLine, sSearchPattern)
 
@@ -546,26 +489,19 @@ function PersonalTools:OnUserListSelection(iListType, sSel)
 
             while (iStart ~= nil) do
                 if ((iLineStart + iStart - 1) <= iPos) and ((iLineStart + iEnd - 1) >= iPos) then break end
-
                 iStart, iEnd = string.find(sLine, sSearchPattern, iEnd)
             end
 
             editor:SetTargetRange((iLineStart + iStart - 1), (iLineStart + iEnd - 1))
-
-        else -- Selected word replace.
+        else
             editor:SetTargetRange(editor.SelectionStart, editor.SelectionEnd)
-
         end
 
         editor:BeginUndoAction()
-
-        -- Replace the word with the new chosen word.
         editor:ReplaceTarget(sSel)
-        -- Go to the end of the new word.
         editor:GotoPos(editor.CurrentPos + string.len(sSel))
         editor:EndUndoAction()
 
-        -- Lexer the new word.
         editor:Colourise(editor.CurrentPos - string.len(sSel), editor.CurrentPos)
     end
 end
