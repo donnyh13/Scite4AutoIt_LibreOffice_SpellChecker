@@ -1,58 +1,55 @@
 #AutoIt3Wrapper_Au3Check_Parameters=-d -w 1 -w 2 -w 3 -w 4 -w 5 -w 6 -w 7
 
-_Scite4AutoIt_SpellChecking()
+; Upon the user invoking either a single word spellcheck or a selection/full script spellcheck, the lua script will collect the word(s) and their start/stop positions.
+; + If a multi-word spellcheck is performed, the lua script writes them and their start/stop positions to Scite4AutoIt_LO_SpellChecker.ini, then calls this AutoIt script with the parameters described below.
+; + If a single word spellcheck is triggered, this AutoIt script is called with the word to check, plus the other parameters described below.
+; Once this script is called, the parameters are processed. And the LibreOffice Service manager is initialized.
+; + If a multi-word spellcheck, all the words are read from Scite4AutoIt_LO_SpellChecker.ini and spellchecked, any misspelled words are left in the ini file.
+; + If a single word spellcheck, the word is processed, and a list of possible correct words are retrieved for each language option, then they are written to Scite4AutoIt_LO_SpellChecker.ini for the lua script.
+; - If the au3 script encounters an error, the exit code is 2 and the error is written to Scite4AutoIt_LO_SpellChecker_ERROR.ini.
+; - If the word or any of multiple words being checked are misspelled, the exit code is 1.
+; - Otherwise exit code 0 means all words are correct.
+; Once the au3 script is done, the lua script interprets the exit code, and proceeds as necessary, either reading the error file, or marking misspelled word(s), and offering spelling suggestions for a single word check.
 
-; #FUNCTION# ====================================================================================================================
-; Name ..........: _Scite4AutoIt_SpellChecking
-; Description ...: The Initial Spell Checking function.
-; Syntax ........: _Scite4AutoIt_SpellChecking()
-; Parameters ....: None
-; Return values .: None
-; Author ........: donnyh13
-; Modified ......:
-; Remarks .......:
-; Related .......:
-; Link ..........:
-; Example .......: No
-; ===============================================================================================================================
-Func _Scite4AutoIt_SpellChecking()
-	Local $bReturn
+; This script expects to be called with 5 parameters.
+; - Param 1: The word to spellcheck, if performing a single word check. Otherwise ## is passed, and the words to check are found in the Scite4AutoIt_LO_SpellChecker.ini file.
+; - Param 2: The 2 to 3 character ISO 639 Language Code.
+; - Param 3: The 2 character long ISO 3166 Country Code. (Each Language and country code pair must be in the same order to pair with each other.)
+; - Param 4: A string (either "single" or "multi"), whether the current check is a single or multi-word check.
+; - Param 5: An Integer of the maximum number of suggested words to return per-language.
 
-	If ($CmdLine[0] > 0) Then
-		__S4A_SpChk_Print_To_Error()
+Global $bReturn
 
-		; Execute the Spell Checker.
-		$bReturn = _S4A_SpChk_SpellCheck($CmdLine[1], $CmdLine[2], $CmdLine[3], $CmdLine[4], $CmdLine[5])
+If ($CmdLine[0] = 5) Then
+	; Execute the Spell Checker with the called parameters.
+	$bReturn = _S4A_SpChk_SpellCheck($CmdLine[1], $CmdLine[2], $CmdLine[3], $CmdLine[4], $CmdLine[5])
 
-		If @error Then ; Something went wrong.
-			Exit 2
-
-		ElseIf ($bReturn = False) Then ; Word(s) are incorrectly spelled.
-			__S4A_SpChk_Print_To_Error(Null) ; Delete the Error file.
-			Exit 1
-
-		Else ; Word(s) are correctly spelled.
-			__S4A_SpChk_Print_To_Error(Null) ; Delete the Error file.
-			Exit 0
-
-		EndIf
-
-	Else ; If no parameters passed, exit.
-		__S4A_SpChk_Print_To_Error("No Parameters passed")
+	If @error Then     ; Something went wrong.
 		Exit 2
 
+	ElseIf $bReturn Then     ; Word(s) are incorrectly spelled.
+		Exit 1
+
+	Else     ; Word(s) are correctly spelled.
+		Exit 0
+
 	EndIf
-EndFunc   ;==>_Scite4AutoIt_SpellChecking
+
+Else ; If no parameters passed, exit and write an error.
+	__S4A_SpChk_Print_To_Error("Wrong number of Parameters passed: " & $CmdLine[0])
+	Exit 2
+
+EndIf
 
 ; #FUNCTION# ====================================================================================================================
 ; Name ..........: _S4A_SpChk_SpellCheck
 ; Description ...: The Main Spell Checking Function.
-; Syntax ........: _S4A_SpChk_SpellCheck($sWordToCheck, $sLanguage, $sCountry, $bReturnWords, $iMaxSuggestions)
-; Parameters ....: $sWordToCheck        - a string value. The Word to check if I am checking a single word.
-;                  $sLanguage           - a string value. The Language(s) to use to check the word(s).
-;                  $sCountry            - a string value. The Country code(s) to use to check the word(s).
-;                  $bReturnWords        - a boolean value. If True, I am checking a single word, and I am to return a list of spelling suggestions.
-;                  $iMaxSuggestions     - an integer value. The Max number of suggestions per language to return.
+; Syntax ........: _S4A_SpChk_SpellCheck($sWordToCheck, $sLanguage, $sCountry, $sCheckMode, $iMaxSuggestions)
+; Parameters ....: $sWordToCheck        - The Word to check if I am checking a single word.
+;                  $sLanguage           - The Language(s) to use to check the word(s).
+;                  $sCountry            - The Country code(s) to use to check the word(s).
+;                  $sCheckMode          - Either "single" or "multi", whether I'm checking a single word or multiple.
+;                  $iMaxSuggestions     - The Max number of suggestions per language to return.
 ; Return values .: Success: Boolean.
 ;				   Failure: 0 and sets the @Error and @Extended flags to non-zero.
 ;				   @error 1 = Input error.
@@ -65,7 +62,7 @@ EndFunc   ;==>_Scite4AutoIt_SpellChecking
 ; Link ..........:
 ; Example .......: No
 ; ===============================================================================================================================
-Func _S4A_SpChk_SpellCheck($sWordToCheck, $sLanguage, $sCountry, $bReturnWords, $iMaxSuggestions)
+Func _S4A_SpChk_SpellCheck($sWordToCheck, $sLanguage, $sCountry, $sCheckMode, $iMaxSuggestions)
 	Local $oCOM_ErrorHandler = ObjEvent("AutoIt.Error", __S4A_SpChk_ComErrorHandler)
 	#forceref $oCOM_ErrorHandler
 
@@ -73,7 +70,6 @@ Func _S4A_SpChk_SpellCheck($sWordToCheck, $sLanguage, $sCountry, $bReturnWords, 
 	Local Const $__FO_READ = 0, $__FO_OVERWRITE = 2, $FO_CREATEPATH = 8
 	Local $sSpCheckFile = @ScriptDir & "\Scite4AutoIt_LO_SpellChecker.ini"
 	Local $oServiceManager, $oSpellChecker
-	Local $aEmptyArgs[1]
 	Local $asLang[2], $asCountry[2]
 	Local $atLocale[0]
 	Local $tLocale
@@ -83,54 +79,29 @@ Func _S4A_SpChk_SpellCheck($sWordToCheck, $sLanguage, $sCountry, $bReturnWords, 
 	If Not IsString($sWordToCheck) Then Return SetError($__S4A_LO_SC_INPUT_ERROR, 1, __S4A_SpChk_Print_To_Error("Word called to check is not a String."))
 	If Not IsString($sLanguage) Then Return SetError($__S4A_LO_SC_INPUT_ERROR, 2, __S4A_SpChk_Print_To_Error("Language code called is not a string."))
 	If Not IsString($sCountry) Then Return SetError($__S4A_LO_SC_INPUT_ERROR, 3, __S4A_SpChk_Print_To_Error("Country code called is not a string."))
-	If IsString($bReturnWords) And ($bReturnWords = "true") Then
-		$bReturnWords = True
+	If Not IsString($sCheckMode) Or (($sCheckMode <> "single") And ($sCheckMode <> "multi")) Then Return SetError($__S4A_LO_SC_INPUT_ERROR, 4, __S4A_SpChk_Print_To_Error("Check mode called is not a string, or not equal to 'single'/'multi'."))
+	If StringRegExp($iMaxSuggestions, "[^\d]") Then Return SetError($__S4A_LO_SC_INPUT_ERROR, 5, __S4A_SpChk_Print_To_Error("Maximum Suggestion per Language parameter called is not a number."))
 
-	ElseIf IsString($bReturnWords) And ($bReturnWords = "false") Then
-		$bReturnWords = False
-
-	EndIf
-
-	If Not IsBool($bReturnWords) Then Return SetError($__S4A_LO_SC_INPUT_ERROR, 4, __S4A_SpChk_Print_To_Error("Return Words parameter called is not a Boolean."))
-	If StringRegExp($iMaxSuggestions, "[^0-9]") Then Return SetError($__S4A_LO_SC_INPUT_ERROR, 5, __S4A_SpChk_Print_To_Error("Maximum Suggestion per Language parameter called is not a number."))
-
-	$sCountry = StringUpper($sCountry)
-	$sLanguage = StringLower($sLanguage)
+	$sCountry = StringUpper($sCountry) ; Country codes are always uppercase, force them to be uppercase to prevent any issues.
+	$sLanguage = StringLower($sLanguage) ; Language codes are always lowercase, force them to be lowercase to prevent any issues.
 	$iMaxSuggestions = Int($iMaxSuggestions)
 
-	If ($iMaxSuggestions < 1) Then Return SetError($__S4A_LO_SC_INPUT_ERROR, 6, __S4A_SpChk_Print_To_Error("Maximum Suggestion per Language parameter called is less than 1."))
+	If ($iMaxSuggestions < 1) Then Return SetError($__S4A_LO_SC_INPUT_ERROR, 6, __S4A_SpChk_Print_To_Error("Maximum Suggestion per Language parameter called with value less than 1."))
 
-	; Split the language codes and store them in the array.
-	If StringInStr($sLanguage, ";") Then
-		$asLang = StringSplit($sLanguage, ";")
-		If @error Then Return SetError($__S4A_LO_SC_INPUT_ERROR, 7, __S4A_SpChk_Print_To_Error("Failed to split Language codes."))
+	; Parse and check the language and country codes and store them in separate arrays, they are to be separated by ";".
+	$asLang = StringSplit($sLanguage, ";")
+	If Not IsArray($asLang) Then Return SetError($__S4A_LO_SC_INPUT_ERROR, 7, __S4A_SpChk_Print_To_Error("Failed to split Language codes."))
 
-		For $i = 1 To $asLang[0]
-			If ((StringLen($asLang[$i]) <> 2) And (StringLen($asLang[$i]) <> 3)) Then Return SetError($__S4A_LO_SC_INPUT_ERROR, 8, __S4A_SpChk_Print_To_Error("Language code " & $asLang[$i] & " called is not 2 or 3 characters long."))
-		Next
+	For $i = 1 To $asLang[0]
+		If ((StringLen($asLang[$i]) <> 2) And (StringLen($asLang[$i]) <> 3)) Then Return SetError($__S4A_LO_SC_INPUT_ERROR, 8, __S4A_SpChk_Print_To_Error("Language code " & $asLang[$i] & " called is not 2 or 3 characters long."))
+	Next
 
-	Else
-		If ((StringLen($sLanguage) <> 2) And (StringLen($sLanguage) <> 3)) Then Return SetError($__S4A_LO_SC_INPUT_ERROR, 9, __S4A_SpChk_Print_To_Error("Language code called is not 2 or 3 characters long."))
-		$asLang[0] = 1
-		$asLang[1] = $sLanguage
+	$asCountry = StringSplit($sCountry, ";")
+	If Not IsArray($asCountry) Then Return SetError($__S4A_LO_SC_INPUT_ERROR, 10, __S4A_SpChk_Print_To_Error("Failed to split Country codes."))
 
-	EndIf
-
-	; Split the Country codes and store them in the array.
-	If StringInStr($sCountry, ";") Then
-		$asCountry = StringSplit($sCountry, ";")
-		If @error Then Return SetError($__S4A_LO_SC_INPUT_ERROR, 10, __S4A_SpChk_Print_To_Error("Failed to split Country codes."))
-
-		For $i = 1 To $asCountry[0]
-			If (StringLen($asCountry[$i]) <> 2) Then Return SetError($__S4A_LO_SC_INPUT_ERROR, 11, __S4A_SpChk_Print_To_Error("Country code " & $asCountry[$i] & " called is not 2 characters long."))
-		Next
-
-	Else
-		If (StringLen($sCountry) <> 2) Then Return SetError($__S4A_LO_SC_INPUT_ERROR, 12, __S4A_SpChk_Print_To_Error("Country code called is not 2 characters long."))
-		$asCountry[0] = 1
-		$asCountry[1] = $sCountry
-
-	EndIf
+	For $i = 1 To $asCountry[0]
+		If (StringLen($asCountry[$i]) <> 2) Then Return SetError($__S4A_LO_SC_INPUT_ERROR, 11, __S4A_SpChk_Print_To_Error("Country code " & $asCountry[$i] & " called is not 2 characters long."))
+	Next
 
 	If ($asLang[0] <> $asCountry[0]) Then Return SetError($__S4A_LO_SC_INPUT_ERROR, 13, __S4A_SpChk_Print_To_Error("Country Codes and Language codes contain unequal amount of values."))
 
@@ -143,45 +114,41 @@ Func _S4A_SpChk_SpellCheck($sWordToCheck, $sLanguage, $sCountry, $bReturnWords, 
 
 	ReDim $atLocale[$asLang[0]]
 
-	; Create the Locale Struct for each language/Country code pair.
+	; Initialize the LibreOffice Service Manager, this is needed to create the Spell checking engine.
+	$oServiceManager = ObjCreate("com.sun.star.ServiceManager")
+	If @error Then Return SetError($__S4A_LO_SC_INIT_ERROR, 3, __S4A_SpChk_Print_To_Error("Failed to create com.sun.star.ServiceManager Object."))
+
+	; Create an instance of the Spell Checker Engine.
+	$oSpellChecker = $oServiceManager.createInstance("com.sun.star.linguistic2.SpellChecker")
+	If Not IsObj($oSpellChecker) Then Return SetError($__S4A_LO_SC_INIT_ERROR, 4, __S4A_SpChk_Print_To_Error("Failed to create com.sun.star.linguistic2.SpellChecker Object."))
+
+	; Create the LibreOffice Locale Struct for each Language/Country code pair and store it in an array for use in the spellchecker.
 	For $i = 1 To $asLang[0]
 		$tLocale = __S4A_SpChk_CreateStruct("com.sun.star.lang.Locale")
 		If @error Then Return SetError($__S4A_LO_SC_INIT_ERROR, 2, __S4A_SpChk_Print_To_Error("Failed to create com.sun.star.lang.Locale Structure."))
 
 		$tLocale.Language = $asLang[$i]
 		$tLocale.Country = $asCountry[$i]
+
+		; Make sure the Language/Country pairing is valid before adding it to the array.
+		If Not $oSpellChecker.hasLocale($tLocale) Then Return SetError($__S4A_LO_SC_PROCESS_ERROR, 1, __S4A_SpChk_Print_To_Error("Language (" & $tLocale.Language() & ") and Country (" & $tLocale.Country() & ") combination is not valid."))
+
 		$atLocale[$i - 1] = $tLocale
-
 	Next
 
-	$aEmptyArgs[0] = __S4A_SpChk_SetPropertyValue("", "")
-	If @error Then Return SetError($__S4A_LO_SC_INIT_ERROR, 3, __S4A_SpChk_Print_To_Error("Failed to create Property Structure."))
-
-	$oServiceManager = ObjCreate("com.sun.star.ServiceManager")
-	If @error Then Return SetError($__S4A_LO_SC_INIT_ERROR, 4, __S4A_SpChk_Print_To_Error("Failed to create com.sun.star.ServiceManager Object."))
-
-	; Create the Spell Checker Engine Object.
-	$oSpellChecker = $oServiceManager.createInstance("com.sun.star.linguistic2.SpellChecker")
-	If Not IsObj($oSpellChecker) Then Return SetError($__S4A_LO_SC_INIT_ERROR, 5, __S4A_SpChk_Print_To_Error("Failed to create com.sun.star.linguistic2.SpellChecker Object."))
-
-	; Make sure all Locale's are valid.
-	For $i = 0 To UBound($atLocale) - 1
-		If Not $oSpellChecker.hasLocale($atLocale[$i]) Then Return SetError($__S4A_LO_SC_PROCESS_ERROR, 1, __S4A_SpChk_Print_To_Error("Language (" & $atLocale[$i].Language() & ") and Country (" & $atLocale[$i].Country() & ") combination is not valid."))
-	Next
-
-	If ($bReturnWords = True) Then ; If Return Words = True, then I am checking a single word.
-		$hFile = FileOpen($sSpCheckFile, $__FO_OVERWRITE)
+	If ($sCheckMode = "single") Then ; Single word check.
+		$hFile = FileOpen($sSpCheckFile, $__FO_OVERWRITE) ; Clear the Scite4AutoIt_LO_SpellChecker.ini file.
 		If ($hFile = -1) Then Return SetError($__S4A_LO_SC_INIT_ERROR, 1, __S4A_SpChk_Print_To_Error("Failed to open Scite4AutoIt_LO_SpellChecker.ini. #2"))
 		FileFlush($hFile)
 
-		$vReturn = __S4A_SpChk_SingleWordCheck($sWordToCheck, $hFile, $oSpellChecker, $atLocale, $aEmptyArgs, $iMaxSuggestions)
+		$vReturn = __S4A_SpChk_SingleWordCheck($sWordToCheck, $hFile, $oSpellChecker, $atLocale, $iMaxSuggestions)
 		Return SetError(@error, FileClose($hFile), $vReturn)
 
-	Else ; Entire Script check.
+	Else ; Multi-word check.
 		$hFile = FileOpen($sSpCheckFile, $__FO_READ)
 		If ($hFile = -1) Then Return SetError($__S4A_LO_SC_INIT_ERROR, 1, __S4A_SpChk_Print_To_Error("Failed to open Scite4AutoIt_LO_SpellChecker.ini. #3"))
 
-		$vReturn = __S4A_SpChk_ScriptWordCheck($hFile, $oSpellChecker, $atLocale, $aEmptyArgs)
+		$vReturn = __S4A_SpChk_ScriptWordCheck($hFile, $oSpellChecker, $atLocale)
 		Return SetError(@error, FileClose($hFile), $vReturn)
 
 	EndIf
@@ -193,13 +160,12 @@ EndFunc   ;==>_S4A_SpChk_SpellCheck
 ; Description ...: Spell Check a single word.
 ; Syntax ........: __S4A_SpChk_SingleWordCheck($sWordToCheck, ByRef $hFile, ByRef $oSpellChecker, ByRef $atLocale, ByRef $aEmptyArgs,
 ;                  $iMaxSuggestions)
-; Parameters ....: $sWordToCheck        - a string value. The Word to Check.
-;                  $hFile               - [in/out] a handle value. The file to write suggested words to.
-;                  $oSpellChecker       - [in/out] an object. The Spell Checker Engine object.
-;                  $atLocale            - [in/out] an array of dll structs. Array of Locale Structures.
-;                  $aEmptyArgs          - [in/out] an array of unknowns. An empty array for L.O. Spelling call.
-;                  $iMaxSuggestions     - an integer value. The Maximum suggestions to return per language.
-; Return values .: Success: Boolean.
+; Parameters ....: $sWordToCheck        - The word to check.
+;                  $hFile               - The file to write suggested words to.
+;                  $oSpellChecker       - The Spell Checker Engine object.
+;                  $atLocale            - Array of Locale Structures.
+;                  $iMaxSuggestions     - The Maximum suggestions to return per language.
+; Return values .: Success: Boolean. True if the word is misspelled.
 ;				   Failure: 0 and sets the @Error and @Extended flags to non-zero.
 ;				   @error 2 = Initialization error.
 ; Author ........: donnyh13
@@ -209,23 +175,24 @@ EndFunc   ;==>_S4A_SpChk_SpellCheck
 ; Link ..........:
 ; Example .......: No
 ; ===============================================================================================================================
-Func __S4A_SpChk_SingleWordCheck($sWordToCheck, ByRef $hFile, ByRef $oSpellChecker, ByRef $atLocale, ByRef $aEmptyArgs, $iMaxSuggestions)
+Func __S4A_SpChk_SingleWordCheck($sWordToCheck, ByRef $hFile, ByRef $oSpellChecker, ByRef $atLocale, $iMaxSuggestions)
 	Local Const $__S4A_LO_SC_SUCCESS = 0, $__S4A_LO_SC_INIT_ERROR = 2
 	Local $oSpell
 	Local $iCount = 0
 	Local $asArray[0]
+	Local $aEmptyArgs[0]
 	Local $aasWords[UBound($atLocale)]
 
 	; Cycle through each Locale to check the word.
 	For $i = 0 To UBound($atLocale) - 1
 
-		If $oSpellChecker.isValid($sWordToCheck, $atLocale[$i], $aEmptyArgs) Then Return SetError($__S4A_LO_SC_SUCCESS, 0, True)
+		If $oSpellChecker.isValid($sWordToCheck, $atLocale[$i], $aEmptyArgs) Then Return SetError($__S4A_LO_SC_SUCCESS, 0, False)
 
-		; If word is invalid, initiate the Spell engine.
+		; If word is invalid, initiate the Spell engine with the locale so I can get spelling suggestions.
 		$oSpell = $oSpellChecker.Spell($sWordToCheck, $atLocale[$i], $aEmptyArgs)
 		If Not IsObj($oSpell) Then Return SetError($__S4A_LO_SC_INIT_ERROR, 1, __S4A_SpChk_Print_To_Error("Failed to retrieve Spelling Object."))
 
-		; If there are alternative words, retrieve them and store them in an array in an array.
+		; If there are spelling suggestions, retrieve them and store them in an array in an array to be written to the Scite4AutoIt_LO_SpellChecker.ini file.
 		If ($oSpell.getAlternativesCount() > 0) Then
 			$asArray = $oSpell.getAlternatives()
 			If Not IsArray($asArray) Then Return SetError($__S4A_LO_SC_INIT_ERROR, 2, __S4A_SpChk_Print_To_Error("Failed to retrieve array of Alternative words."))
@@ -235,7 +202,8 @@ Func __S4A_SpChk_SingleWordCheck($sWordToCheck, ByRef $hFile, ByRef $oSpellCheck
 		EndIf
 	Next
 
-	; Scan the suggested words Array for duplicated suggestions.
+	; Multiple dictionaries could return the same word suggestion.
+	; Scan the suggested words Array for duplicated suggested words and remove them. Array is modified directly by ByRef.
 	__S4A_SpChk_DuplicateWordScan($aasWords)
 
 	; Write the suggested words to file.
@@ -255,18 +223,17 @@ Func __S4A_SpChk_SingleWordCheck($sWordToCheck, ByRef $hFile, ByRef $oSpellCheck
 
 	FileFlush($hFile)
 
-	Return SetError($__S4A_LO_SC_SUCCESS, 0, False)
+	Return SetError($__S4A_LO_SC_SUCCESS, 0, True)
 EndFunc   ;==>__S4A_SpChk_SingleWordCheck
 
 ; #INTERNAL_USE_ONLY# ===========================================================================================================
 ; Name ..........: __S4A_SpChk_ScriptWordCheck
 ; Description ...: Spell Check an entire Script.
 ; Syntax ........: __S4A_SpChk_ScriptWordCheck(ByRef $hFile, ByRef $oSpellChecker, ByRef $atLocale, ByRef $aEmptyArgs)
-; Parameters ....: $hFile               - [in/out] a handle value. The File to read the words to check from.
-;                  $oSpellChecker       - [in/out] an object.The Spell Checker Engine object.
-;                  $atLocale            - [in/out] an array of dll structs. Array of Locale Structures.
-;                  $aEmptyArgs          - [in/out] an array of unknowns. An empty array for L.O. Spelling call.
-; Return values .: Success: Boolean.
+; Parameters ....: $hFile               - The File to read the words to spellcheck from.
+;                  $oSpellChecker       - The Spell Checker Engine object.
+;                  $atLocale            - Array of Locale Structures.
+; Return values .: Success: Boolean. True if some or all words are misspelled.
 ;				   Failure: 0 and sets the @Error and @Extended flags to non-zero.
 ;				   @error 2 = Initialization error.
 ;				   @error 3 = Processing error.
@@ -277,14 +244,16 @@ EndFunc   ;==>__S4A_SpChk_SingleWordCheck
 ; Link ..........:
 ; Example .......: No
 ; ===============================================================================================================================
-Func __S4A_SpChk_ScriptWordCheck(ByRef $hFile, ByRef $oSpellChecker, ByRef $atLocale, ByRef $aEmptyArgs)
+Func __S4A_SpChk_ScriptWordCheck(ByRef $hFile, ByRef $oSpellChecker, ByRef $atLocale)
 	Local Const $__S4A_LO_SC_SUCCESS = 0, $__S4A_LO_SC_INIT_ERROR = 2, $__S4A_LO_SC_PROCESS_ERROR = 3
 	Local Const $__FO_OVERWRITE = 2
 	Local $asWords[0]
-	Local $iLines = 0, $iCount = 0
+	Local $aEmptyArgs[0]
+	Local $iLines = 0, $iMisspellCount = 0
 	Local $sWordToCheck = "", $sSpCheckFile = @ScriptDir & "\Scite4AutoIt_LO_SpellChecker.ini"
 
-	; Read the words to check to an array.
+	; Read the words to check to an array. Each line will contain the word to check, plus its start/stop position in the script file.
+	; The word is first, then a @TAB is inserted, then the start position, another @TAB and the end position.
 	$asWords = FileReadToArray($hFile)
 	If @error Then Return SetError($__S4A_LO_SC_PROCESS_ERROR, 1, __S4A_SpChk_Print_To_Error("Failed to Read File to Array."))
 	$iLines = @extended
@@ -300,23 +269,24 @@ Func __S4A_SpChk_ScriptWordCheck(ByRef $hFile, ByRef $oSpellChecker, ByRef $atLo
 	For $j = 0 To UBound($atLocale) - 1
 		For $i = 0 To $iLines - 1
 			If IsString($asWords[$i]) Then
+				; The word is written to file as such: word @TAB Start-position @TAB End-position.
 				$sWordToCheck = StringLeft($asWords[$i], StringInStr($asWords[$i], @TAB) - 1)
-				If $oSpellChecker.isValid($sWordToCheck, $atLocale[$j], $aEmptyArgs) Then $asWords[$i] = 0 ; Overwrite the word with 0 to indicate it is spelled correctly.
+				If $oSpellChecker.isValid($sWordToCheck, $atLocale[$j], $aEmptyArgs) Then $asWords[$i] = 0 ; Overwrite the word entry with 0 to indicate it is spelled correctly.
 			EndIf
 		Next
 	Next
 
-	; Write the words that are still misspelled back to the file.
+	; Write the words and positions that are misspelled back to the file so the lua script can color them.
 	For $i = 0 To $iLines - 1
 		If IsString($asWords[$i]) Then
-			FileWrite($hFile, $asWords[$i] & @CRLF)
-			$iCount += 1
+			FileWriteLine($hFile, $asWords[$i])
+			$iMisspellCount += 1
 		EndIf
 	Next
 
 	FileFlush($hFile)
 
-	Return ($iCount > 0) ? SetError($__S4A_LO_SC_SUCCESS, 0, False) : SetError($__S4A_LO_SC_SUCCESS, 0, True) ; Return false if words were processed.
+	Return ($iMisspellCount = 0) ? SetError($__S4A_LO_SC_SUCCESS, 0, False) : SetError($__S4A_LO_SC_SUCCESS, 0, True) ; If no misspellings were found, return False.
 EndFunc   ;==>__S4A_SpChk_ScriptWordCheck
 
 ; #INTERNAL_USE_ONLY# ===========================================================================================================
@@ -338,11 +308,9 @@ Func __S4A_SpChk_DuplicateWordScan(ByRef $aasWords)
 
 	If (UBound($aasWords) > 1) Then
 		For $i = 0 To UBound($aasWords) - 1
-
 			If IsArray($aasWords[$i]) Then
 
 				For $j = 0 To UBound($aasWords[$i]) - 1
-
 					If IsString(($aasWords[$i])[$j]) Then
 
 						For $k = $i + 1 To UBound($aasWords) - 1
@@ -356,11 +324,8 @@ Func __S4A_SpChk_DuplicateWordScan(ByRef $aasWords)
 							Next
 						Next
 					EndIf
-
 				Next
-
 			EndIf
-
 		Next
 	EndIf
 
@@ -371,8 +336,8 @@ EndFunc   ;==>__S4A_SpChk_DuplicateWordScan
 ; Name ..........: __S4A_SpChk_CreateStruct
 ; Description ...: Retrieves a Struct.
 ; Syntax ........: __S4A_SpChk_CreateStruct($sStructName)
-; Parameters ....: $sStructName	- a string value. Name of structure to create.
-; Return values .:Success: Structure.
+; Parameters ....: $sStructName	- The name of the LibreOffice structure to create.
+; Return values .: Success: Structure.
 ;				   Failure: 0 and sets the @Error and @Extended flags to non-zero.
 ;				   --Input Errors--
 ;				   @Error 1 @Extended 1 Return 0 = $sStructName Value not a string
@@ -412,7 +377,7 @@ EndFunc   ;==>__S4A_SpChk_CreateStruct
 ; Syntax ........: __S4A_SpChk_SetPropertyValue($sName, $vValue)
 ; Parameters ....: $sName               - a string value. Property name.
 ;                  $vValue              - a variant value. Property value.
-; Return values .:Success: Object
+; Return values .: Success: Object
 ;				   Failure: 0 and sets the @Error and @Extended flags to non-zero.
 ;				   --Input Errors--
 ;				   @Error 1 @Extended 1 Return 0 = Property $sName Value was not a string
@@ -447,50 +412,22 @@ EndFunc   ;==>__S4A_SpChk_SetPropertyValue
 
 ; #INTERNAL_USE_ONLY# ===========================================================================================================
 ; Name ..........: __S4A_SpChk_Print_To_Error
-; Description ...: Print an error to an Error file.
-; Syntax ........: __S4A_SpChk_Print_To_Error([$sError = ""])
-; Parameters ....: $sError              - [optional] a string value. Default is "". The Error message to print to the error script. See remarks.
+; Description ...: Prints an error to an Error file.
+; Syntax ........: __S4A_SpChk_Print_To_Error($sError)
+; Parameters ....: $sError              - Default is "". The Error message to print to the error script.
 ; Return values .: None
 ; Author ........: donnyh13
 ; Modified ......:
-; Remarks .......: Calling $sError with a blank string ("") clears the error file.
-;				   Calling $sError with Null keyword deletes the error file.
+; Remarks .......: This functions writes an error message to a ini file so the lua script can output it to the console.
 ; Related .......:
 ; Link ..........:
 ; Example .......: No
 ; ===============================================================================================================================
-Func __S4A_SpChk_Print_To_Error($sError = "")
+Func __S4A_SpChk_Print_To_Error($sError)
 	Local Const $__sError_File = @ScriptDir & "\Scite4AutoIt_LO_SpellChecker_ERROR.ini"
-	Local Const $__S4A_LO_SC_SUCCESS = 0, $__S4A_LO_SC_INIT_ERROR = 2
-	Local $hFile
-	Local Const $__FO_READ = 0, $__FO_APPEND = 1, $__FO_OVERWRITE = 2
+	Local Const $__S4A_LO_SC_SUCCESS = 0
 
-	$hFile = FileOpen($__sError_File, $__FO_READ)
-
-	If ($hFile = -1) Then ; Create File
-		$hFile = FileOpen($__sError_File, $__FO_OVERWRITE)
-		If ($hFile = -1) Then Return SetError($__S4A_LO_SC_INIT_ERROR, 1, 0)
-	EndIf
-
-	FileClose($hFile)
-
-	If ($sError = "") Then ; Clear the error file.
-		$hFile = FileOpen($__sError_File, $__FO_OVERWRITE)
-		If ($hFile = -1) Then Return SetError($__S4A_LO_SC_INIT_ERROR, 1, 0)
-
-	ElseIf ($sError = Null) Then
-		FileDelete($__sError_File)
-
-	Else ; Write the error.
-		$hFile = FileOpen($__sError_File, $__FO_APPEND)
-		If ($hFile = -1) Then Return SetError($__S4A_LO_SC_INIT_ERROR, 1, 0)
-	EndIf
-
-	FileWrite($hFile, $sError & @CRLF)
-
-	FileFlush($hFile)
-
-	FileClose($hFile)
+	FileWriteLine($__sError_File, $sError)
 
 	Return SetError($__S4A_LO_SC_SUCCESS, 0, 0)
 EndFunc   ;==>__S4A_SpChk_Print_To_Error
@@ -499,17 +436,17 @@ EndFunc   ;==>__S4A_SpChk_Print_To_Error
 ; Name ..........: __S4A_SpChk_ComErrorHandler
 ; Description ...: ComError Handler
 ; Syntax ........: __S4A_SpChk_ComErrorHandler(ByRef $oComError)
-; Parameters ....: $oComError           - [in/out] an object. The Com Error Object passed by Autoit.Error.
+; Parameters ....: $oComError           - The Com Error Object passed by Autoit.Error.
 ; Return values .: None
 ; Author ........: mLipok
-; Modified ......: donnyh13 - Added ConsoleWrite option.
+; Modified ......: donnyh13
 ; Remarks .......:
 ; Related .......:
 ; Link ..........:
 ; Example .......: No
 ; ===============================================================================================================================
 Func __S4A_SpChk_ComErrorHandler(ByRef $oComError)
-	#forceref $oComError
+	; Output the COM error to the error file, so that the lua script can output it to the console.
 	__S4A_SpChk_Print_To_Error("A COM Error was thrown." & @CRLF & _
 			"!--COM Error-Begin--" & @CRLF & _
 			"Number: 0x" & Hex($oComError.number, 8) & @CRLF & _
@@ -521,5 +458,4 @@ Func __S4A_SpChk_ComErrorHandler(ByRef $oComError)
 			"LastDLLError: " & $oComError.lastdllerror & @CRLF & _
 			"At line: " & $oComError.scriptline & @CRLF & _
 			"!--COM-Error-End--" & @CRLF)
-	; This function does nothing.
 EndFunc   ;==>__S4A_SpChk_ComErrorHandler
