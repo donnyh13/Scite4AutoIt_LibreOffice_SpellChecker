@@ -17,6 +17,11 @@ Go to [legend](#legend---types-of-changes) for further information about the typ
 |    **v0.1.0**        | [Change Log](#010---2024-04-26)         | [v0.1.0][v0.1.0]               | 2024-04-26     | [Compare][v0.1.0-Compare]  |
 |    **v0.0.1-alpha**  | [Change Log](#001-alpha---2023-12-20)   | [v0.0.1-alpha][v0.0.1-alpha]   | 2023-12-20     |                            |
 
+## [0.2.2] - 2026-
+### Fixed
+
+- Wrong lua dot vs colon usage.
+
 ## [0.2.1] - 2026-08-28
 
 ### Changed
