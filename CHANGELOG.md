@@ -11,11 +11,22 @@ Go to [legend](#legend---types-of-changes) for further information about the typ
 
 |    Version           |    Changes                              |    Download                    |     Released   |    Compare on GitHub       |
 |:---------------------|:---------------------------------------:|:------------------------------:|:--------------:|:---------------------------|
+|    **v0.2.2**        | [Change Log](#022---2026-08-31)         | [v0.2.1][v0.2.2]               | 2026-08-31     | [Compare][v0.2.2-Compare]  |
 |    **v0.2.1**        | [Change Log](#021---2026-08-28)         | [v0.2.1][v0.2.1]               | 2026-08-28     | [Compare][v0.2.1-Compare]  |
 |    **v0.2.0**        | [Change Log](#020---2026-08-23)         | [v0.2.0][v0.2.0]               | 2026-08-23     | [Compare][v0.2.0-Compare]  |
 |    **v0.1.1**        | [Change Log](#011---2024-05-01)         | [v0.1.1][v0.1.1]               | 2024-05-01     | [Compare][v0.1.1-Compare]  |
 |    **v0.1.0**        | [Change Log](#010---2024-04-26)         | [v0.1.0][v0.1.0]               | 2024-04-26     | [Compare][v0.1.0-Compare]  |
 |    **v0.0.1-alpha**  | [Change Log](#001-alpha---2023-12-20)   | [v0.0.1-alpha][v0.0.1-alpha]   | 2023-12-20     |                            |
+
+## [0.2.2] - 2026-08-31
+
+### Documented
+
+- Corrected wrong syntax parameters in Au3 headers.
+
+### Fixed
+
+- Wrong lua dot vs colon usage.
 
 ## [0.2.1] - 2026-08-28
 
@@ -124,7 +135,9 @@ Go to [legend](#legend---types-of-changes) for further information about the typ
 [v0.1.1-Compare]: https://github.com/donnyh13/Scite4AutoIt_LibreOffice_SpellChecker/compare/v0.1.0...v0.1.1
 [v0.2.0-Compare]: https://github.com/donnyh13/Scite4AutoIt_LibreOffice_SpellChecker/compare/v0.1.1...v0.2.0
 [v0.2.1-Compare]: https://github.com/donnyh13/Scite4AutoIt_LibreOffice_SpellChecker/compare/v0.2.0...v0.2.1
+[v0.2.2-Compare]: https://github.com/donnyh13/Scite4AutoIt_LibreOffice_SpellChecker/compare/v0.2.1...v0.2.2
 
+[v0.2.2]: https://github.com/donnyh13/Scite4AutoIt_LibreOffice_SpellChecker/releases/tag/v0.2.2
 [v0.2.1]: https://github.com/donnyh13/Scite4AutoIt_LibreOffice_SpellChecker/releases/tag/v0.2.1
 [v0.2.0]: https://github.com/donnyh13/Scite4AutoIt_LibreOffice_SpellChecker/releases/tag/v0.2.0
 [v0.1.1]: https://github.com/donnyh13/Scite4AutoIt_LibreOffice_SpellChecker/releases/tag/v0.1.1

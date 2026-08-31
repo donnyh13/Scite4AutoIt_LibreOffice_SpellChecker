@@ -444,8 +444,8 @@ end
 --	iUserListType - The User List Type.
 --	sSel - The word selected by the user from the User List.
 --------------------------------------------------------------------------------
-function PersonalTools.OnUserListSelection(iUserListType, sSel)
-    -- The List Style I use for Spelling suggestions is 18 (unless modified by the user), if the list is mine, perform the word replacement.
+function PersonalTools:OnUserListSelection(iUserListType, sSel)
+    -- If the list style is mine, perform the word replacement, otherwise skip it
     if iUserListType == iListType then
         local iLine, iStart, iEnd, iLineStart
         local sLine
