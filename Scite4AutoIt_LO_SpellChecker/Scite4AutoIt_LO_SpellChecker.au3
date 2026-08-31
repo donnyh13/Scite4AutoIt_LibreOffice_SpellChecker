@@ -158,8 +158,7 @@ EndFunc   ;==>_S4A_SpChk_SpellCheck
 ; #INTERNAL_USE_ONLY# ===========================================================================================================
 ; Name ..........: __S4A_SpChk_SingleWordCheck
 ; Description ...: Spell Check a single word.
-; Syntax ........: __S4A_SpChk_SingleWordCheck($sWordToCheck, ByRef $hFile, ByRef $oSpellChecker, ByRef $atLocale, ByRef $aEmptyArgs,
-;                  $iMaxSuggestions)
+; Syntax ........: __S4A_SpChk_SingleWordCheck($sWordToCheck, ByRef $hFile, ByRef $oSpellChecker, ByRef $atLocale, $iMaxSuggestions)
 ; Parameters ....: $sWordToCheck        - The word to check.
 ;                  $hFile               - The file to write suggested words to.
 ;                  $oSpellChecker       - The Spell Checker Engine object.
@@ -229,7 +228,7 @@ EndFunc   ;==>__S4A_SpChk_SingleWordCheck
 ; #INTERNAL_USE_ONLY# ===========================================================================================================
 ; Name ..........: __S4A_SpChk_ScriptWordCheck
 ; Description ...: Spell Check an entire Script.
-; Syntax ........: __S4A_SpChk_ScriptWordCheck(ByRef $hFile, ByRef $oSpellChecker, ByRef $atLocale, ByRef $aEmptyArgs)
+; Syntax ........: __S4A_SpChk_ScriptWordCheck(ByRef $hFile, ByRef $oSpellChecker, ByRef $atLocale)
 ; Parameters ....: $hFile               - The File to read the words to spellcheck from.
 ;                  $oSpellChecker       - The Spell Checker Engine object.
 ;                  $atLocale            - Array of Locale Structures.
